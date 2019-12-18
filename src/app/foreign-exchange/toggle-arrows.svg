@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="20px" height="23px" viewBox="0 0 20 23" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <g id="UI" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="003" transform="translate(-882.000000, -317.000000)">
+            <g id="Group-4" transform="translate(428.000000, 247.000000)">
+                <g id="Group-5" transform="translate(440.000000, 57.000000)">
+                    <g id="Transfer-between-accounts-24px-Copy-3" transform="translate(24.000000, 24.000000) rotate(90.000000) translate(-24.000000, -24.000000) translate(12.000000, 12.000000)">
+                        <polygon id="bounds" points="0 0 24 0 24 24 0 24"></polygon>
+                        <g id="Group-3" transform="translate(1.000000, 3.000000)" stroke="#0075eb" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5">
+                            <line x1="0.916666667" y1="4.05" x2="22" y2="4.05" id="Stroke-1"></line>
+                            <polyline id="Stroke-3" points="18.3333333 0.419970703 22 4.0199707 18.3333333 7.6199707"></polyline>
+                            <line x1="21.5416667" y1="13.8300003" x2="1.6308704" y2="13.8300003" id="Stroke-5"></line>
+                            <polyline id="Stroke-7" points="4.54347826 17.6086957 0.717391304 13.8521739 4.54347826 10.0956522"></polyline>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

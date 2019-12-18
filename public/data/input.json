@@ -1,0 +1,16 @@
+{
+  "pockets": [
+    {
+      "amount": 1000,
+      "currency": "GBP"
+    },
+    {
+      "amount": 2000,
+      "currency": "EUR"
+    },
+    {
+      "amount": 3000,
+      "currency": "USD"
+    }
+  ]
+}

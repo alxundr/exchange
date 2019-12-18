@@ -1,0 +1,19 @@
+@import "src/assets/variables";
+
+.card {
+  display: flex;
+  flex-direction: column;
+  padding: $small-spacing;
+  border: none;
+  box-shadow: 0 1px 2px 0 $border-color;
+  // min-height: calc(100vh - 3rem);
+
+  & > * {
+    margin-bottom: 1rem;
+  }
+
+  @media only screen and (min-width: $min-width-small) {
+    min-height: auto;
+    border: 1px solid $border-color;
+  }
+}
