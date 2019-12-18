@@ -1,29 +1,48 @@
-# README #
+## Before start
 
-This README would normally document whatever steps are necessary to get your application up and running.
+You need NodeJS (v10.13.5 would be advisable, specially for the node-sass dependency), and `npm` or `yarn` to be installed.
 
-### What is this repository for? ###
+### `yarn` or `npm i` will install all dependencies.
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+## To start
 
-### How do I get set up? ###
+In the project directory, you can run:
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
+### `yarn start` or `npm start`
 
-### Contribution guidelines ###
+Runs the app in the development mode.
+A browser window will open at [http://localhost:3000](http://localhost:3000).
 
-* Writing tests
-* Code review
-* Other guidelines
+### `yarn test` or `npm test`
 
-### Who do I talk to? ###
+This script launches the test runner and also shows the coverage of the current files.
 
-* Repo owner or admin
-* Other community or team contact
+### `yarn serve` or `npm run serve`
+
+Will build a production ready version of the app and run the app in production mode.
+You can find the app running at [http://localhost:3000](http://localhost:3000).
+
+## Input file
+
+The input file with the information of the pockets is located at `public/data/input.json`
+
+```json
+{
+  "pockets": [
+    {
+      "amount": 1000,
+      "currency": "GBP"
+    },
+    {
+      "amount": 2000,
+      "currency": "EUR"
+    },
+    {
+      "amount": 3000,
+      "currency": "USD"
+    }
+  ]
+}
+```
+
+Additionally a mocked exchange json input is located at `public/data/exchange.json`

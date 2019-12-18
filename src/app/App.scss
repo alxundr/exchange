@@ -1,0 +1,20 @@
+@import "src/assets/variables";
+
+.App {
+  display: flex;
+  flex-direction: column;
+
+  & > * {
+    margin: 0;
+  }
+
+  @media only screen and (min-width: $min-width-small) {
+    padding: $small-spacing;
+
+    & > * {
+      width: 50%;
+      padding: $small-spacing;
+      margin: auto;
+    }
+  }
+}
