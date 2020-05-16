@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@types/enzyme": "^3.10.5",
     "@types/node": "^12.0.0",
     "@types/react": "^16.9.0",
     "@types/react-dom": "^16.9.0",
@@ -32,6 +33,18 @@
     "test": "react-scripts test --coverage --watchAll=false",
     "build": "react-scripts build",
     "serve": "yarn build && serve build -l 3000 -s"
+  },
+  "engines": {
+    "node": "<=10.x"
+  },
+  "jest": {
+    "collectCoverageFrom": [
+      "!src/index.tsx",
+      "src/**/*.tsx",
+      "src/**/*.ts",
+      "!src/domain/state.ts",
+      "!src/react-app-env.d.ts"
+    ]
   },
   "eslintConfig": {
     "extends": "react-app"

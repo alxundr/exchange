@@ -1,26 +1,24 @@
 import React, { useEffect, useState } from 'react';
 
 import { Amount } from '../domain/amount';
-import OPEN_EXCHANGE_ENDPOINT from '../domain/open-exchange';
+import { State } from '../domain/state';
+import { getRatesByCurrency } from '../proxy/rates';
+import { getPockets } from '../proxy/pockets'; 
 import ForeignExchange from './foreign-exchange/ForeignExchange';
 import './App.scss';
 
 const App: React.FC = () => {
-  const [initialState, setInitialState] = useState();
+  const [initialState, setInitialState] = useState<State>();
   const [isFetchComplete, setIsFetchComplete] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchData = async () => {
-      const responsePockets = await fetch ('./data/input.json');
-      const { pockets } = await responsePockets.json();
-      const _pockets = pockets.map(({ amount, currency }: any) => new Amount(amount, currency));
-
-      const responseRates = await fetch(`${OPEN_EXCHANGE_ENDPOINT}&base=${pockets[0].currency}`);
-      const { rates } = await responseRates.json();
-      const input = new Amount(0, pockets[0].currency);
-      const output = new Amount(0, pockets[1].currency);
+      const pockets = await getPockets();
+      const rates  = await getRatesByCurrency(pockets[0].currency.id)
+      const input = new Amount(0, pockets[0].currency.id);
+      const output = new Amount(0, pockets[1].currency.id);
       setInitialState({
-        pockets: _pockets,
+        pockets,
         input,
         output,
         rates,
@@ -32,7 +30,7 @@ const App: React.FC = () => {
     }
   }, [setInitialState, isFetchComplete, setIsFetchComplete]);
 
-  if (!isFetchComplete) {
+  if (!isFetchComplete || !initialState) {
     return <div>loading...</div>
   }
 

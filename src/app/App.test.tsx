@@ -6,7 +6,7 @@ import { act } from 'react-dom/test-utils'
 import App from './App';
 import ForeignExchange from './foreign-exchange/ForeignExchange';
 import { Amount } from '../domain/amount';
-import OPEN_EXCHANGE_ENDPOINT from '../domain/open-exchange';
+import { OPEN_EXCHANGE_ENDPOINT } from '../proxy/rates';
 
 describe('App Component', () => {
   beforeAll(() => {

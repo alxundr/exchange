@@ -4,10 +4,11 @@ import { reducer } from '../../domain/reducers';
 import { actionCreators } from '../../domain/actions';
 import { Amount } from '../../domain/amount';
 import { State } from '../../domain/state';
-import OPEN_EXCHANGE_ENDPOINT from '../../domain/open-exchange';
+import { getRatesByCurrency } from '../../proxy/rates';
 import Card, { CardColor } from '../shared/card/Card';
 import Text, { TextSize, TextType } from '../shared/text/Text';
 import InputAmount from '../shared/input-amount/InputAmount';
+import InputAmountDisabled from '../shared/input-amount/InputAmountDisabled';
 import { useInterval } from '../../domain/interval';
 
 import ToggleArrows from './toggle-arrows.svg';
@@ -28,9 +29,7 @@ const ForeignExchange: React.FC<State> = (props: State) => {
   }, [state, setDisabled]);
 
   const updateRates = async (currency: string) => {
-    const responseRates = await fetch(`${OPEN_EXCHANGE_ENDPOINT}&base=${currency}`);
-    const { rates } = await responseRates.json();
-    dispatch(actionCreators.updateRates(rates));
+    dispatch(actionCreators.updateRates(await getRatesByCurrency(currency)));
   }
 
   useInterval(async () => {
@@ -112,7 +111,7 @@ const ForeignExchange: React.FC<State> = (props: State) => {
           <select className="large" value={state.output.currency.id} onChange={handleOutputSelectChange}>
             {currencyOptions(state.input.currency.id)}
           </select>
-          <InputAmount amount={state.output} disabled />
+          <InputAmountDisabled amount={state.output}/>
         </div>
         <div className="space-between">
           <Text size={TextSize.Small} type={TextType.Secondary}>

@@ -4,11 +4,10 @@ import './InputAmount.scss';
 
 interface InputAmountProps {
   amount: Amount;
-  disabled?: boolean;
-  setValue?: (value: number) => void;
+  setValue: (value: number) => void;
 }
 
-const InputAmount: React.FC<InputAmountProps> = ({ amount, setValue = () => {}, disabled = false}) => {
+const InputAmount: React.FC<InputAmountProps> = ({ amount, setValue }) => {
   const handleInput = (event: any) => {
     const _amount = event.currentTarget.value;
     if (!_amount || !/^[-+]?(\d+|\d+\.\d*|\d*\.\d+)$/.test(_amount)) {
@@ -20,12 +19,6 @@ const InputAmount: React.FC<InputAmountProps> = ({ amount, setValue = () => {}, 
 
   const getRenderedValue = (str: string) => {
     return str.replace(/^0+/,'');
-  }
-
-  if (disabled) {
-    return (
-      <span>{amount.value > 0 && (<div className="input-amount-field">{amount.value}</div>)}</span>
-    )
   }
 
   return (

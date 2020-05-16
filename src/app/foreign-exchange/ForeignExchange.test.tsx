@@ -9,7 +9,8 @@ import { State } from '../../domain/state';
 import ForeignExchange from './ForeignExchange';
 import InputAmount from '../shared/input-amount/InputAmount';
 import Text from '../shared/text/Text';
-import OPEN_EXCHANGE_ENDPOINT from '../../domain/open-exchange';
+import { OPEN_EXCHANGE_ENDPOINT } from '../../proxy/rates';
+import InputAmountDisabled from '../shared/input-amount/InputAmountDisabled';
 
 describe('ForeignExchange', () => {
   const initialState: State = {
@@ -55,15 +56,15 @@ describe('ForeignExchange', () => {
     expect(component.find('option').at(0).text()).toContain('£ 1.00 = € 1.00');
     jest.advanceTimersByTime(10001);
     act(() => {
-      (component.find(InputAmount).at(0).props() as any).setValue(1);
+      component.find(InputAmount).prop('setValue')(1);
     });
     await act(async () => {
       component.update();
     });
     act(() => {
-      component.find(InputAmount).at(1).update();
+      component.find(InputAmountDisabled).update();
     });
-    expect((component.find(InputAmount).at(1).props() as any).amount.toString()).toEqual('€ 1.23');
+    expect(component.find(InputAmountDisabled).prop('amount').toString()).toEqual('€ 1.23');
 
     fetchMock.restore();
 
@@ -78,9 +79,11 @@ describe('ForeignExchange', () => {
       component.update();
     });
     act(() => {
-      component.find(InputAmount).at(1).update();
+      component.find(InputAmountDisabled).update();
     });
-    expect((component.find(InputAmount).at(1).props() as any).amount.toString()).toEqual('€ 4.56');
+    expect(component.find(InputAmountDisabled).prop('amount').toString()).toEqual('€ 4.56');
+
+    component.unmount();
   });
 
   test('update ouput on select currency change', async () => {
@@ -92,15 +95,15 @@ describe('ForeignExchange', () => {
     });
     const component = mount(<ForeignExchange {...{...initialState, rates: { USD: 1, EUR: 2 }}} />);
     act(() => {
-      (component.find(InputAmount).at(0).props() as any).setValue(1);
+      component.find(InputAmount).at(0).prop('setValue')(1);
     });
     await act(async () => {
       component.update();
     });
     act(() => {
-      component.find(InputAmount).at(1).update();
+      component.find(InputAmountDisabled).update();
     });
-    expect((component.find(InputAmount).at(1).props() as any).amount.toString()).toEqual('€ 2.00');
+    expect(component.find(InputAmountDisabled).prop('amount').toString()).toEqual('€ 2.00');
     act(() => {
       component.find('select').at(0).props().onChange({ target: { value: 'USD' }} as any);
     });
@@ -108,15 +111,15 @@ describe('ForeignExchange', () => {
       component.update();
     });
     act(() => {
-      component.find(InputAmount).at(1).update();
+      component.find(InputAmountDisabled).update();
     });
-    expect((component.find(InputAmount).at(1).props() as any).amount.toString()).toEqual('$ 1.00');
+    expect(component.find(InputAmountDisabled).prop('amount').toString()).toEqual('$ 1.00');
   });
 
   test('toggle currency input and output', async () => {
     const component = mount(<ForeignExchange {...initialState} />);
-    expect((component.find(InputAmount).at(0).props() as any).amount).toEqual(initialState.input);
-    expect((component.find(InputAmount).at(1).props() as any).amount).toEqual(initialState.output);
+    expect(component.find(InputAmount).at(0).prop('amount')).toEqual(initialState.input);
+    expect(component.find(InputAmountDisabled).prop('amount')).toEqual(initialState.output);
     act(() => {
       component.find('img.toggle-arrows').props().onClick(null);
     });
@@ -126,8 +129,8 @@ describe('ForeignExchange', () => {
     act(() => {
       component.update();
     });
-    expect((component.find(InputAmount).at(0).props() as any).amount).toEqual(initialState.output);
-    expect((component.find(InputAmount).at(1).props() as any).amount).toEqual(initialState.input);
+    expect(component.find(InputAmount).at(0).prop('amount')).toEqual(initialState.output);
+    expect(component.find(InputAmountDisabled).prop('amount')).toEqual(initialState.input);
   });
 
   test('change input pocket', async () => {
@@ -141,13 +144,13 @@ describe('ForeignExchange', () => {
     act(() => {
       component.update();
     });
-    expect((component.find(InputAmount).at(0).props() as any).amount).toEqual(new Amount(0, initialState.pockets[1].currency.id));
+    expect(component.find(InputAmount).at(0).prop('amount')).toEqual(new Amount(0, initialState.pockets[1].currency.id));
   });
 
   test('disable exchange button', () => {
     const component = mount(<ForeignExchange {...initialState} />);
     act(() => {
-      (component.find(InputAmount).at(0).props() as any).setValue(10);
+      component.find(InputAmount).at(0).prop('setValue')(10);
     });
     act(() => {
       component.update();
@@ -155,7 +158,7 @@ describe('ForeignExchange', () => {
     expect(component.find('button').props().disabled).toBeTruthy();
 
     act(() => {
-      (component.find(InputAmount).at(0).props() as any).setValue(1);
+      component.find(InputAmount).at(0).prop('setValue')(1);
     });
     act(() => {
       component.update();
@@ -167,7 +170,7 @@ describe('ForeignExchange', () => {
     const component = mount(<ForeignExchange {...initialState} />);
     expect(component.find(Text).at(0).text()).toContain('Balance £ 1.00');
     act(() => {
-      (component.find(InputAmount).at(0).props() as any).setValue(1);
+      component.find(InputAmount).at(0).prop('setValue')(1);
     });
     act(() => {
       component.update();

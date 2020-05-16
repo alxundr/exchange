@@ -2,16 +2,7 @@ import { Amount } from './amount';
 import { Action } from './actions';
 import { State } from './state';
 
-const initialState: State = {
-  pockets: [],
-  rates: {
-    USD: 0,
-  },
-  input: new Amount(0),
-  output: new Amount(0),
-}
-
-export const reducer = (state = initialState, { type, payload }: any) => {
+export const reducer = (state: State, { type, payload }: any) => {
   switch (type) {
     case Action.SetInputAmount: {
       const input = new Amount(payload, state.input.currency.id);
@@ -66,7 +57,8 @@ export const reducer = (state = initialState, { type, payload }: any) => {
         pockets,
       }
     }
-    default:
+    /* istanbul ignore next */
+    default:      
       return state;
   }
 }

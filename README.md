@@ -1,6 +1,6 @@
 ## Before start
 
-You need NodeJS (v10.13.5 would be advisable, specially for the node-sass dependency), and `npm` or `yarn` to be installed.
+# You need NodeJS (v10.13.5 would be advisable, specially for the node-sass dependency), and `npm` or `yarn` to be installed.
 
 ### `yarn` or `npm i` will install all dependencies.
 
@@ -45,4 +45,13 @@ The input file with the information of the pockets is located at `public/data/in
 }
 ```
 
-Additionally a mocked exchange json input is located at `public/data/exchange.json`
+## Using Open Exchange
+
+Replace your `.env` file with your **app_id**
+```
+REACT_APP_EXCHANGE_ID=someAppIdHere
+```
+
+## Mocking api
+
+Additionally a mocked exchange json input is located at `public/data/exchange.json`, to use it set `process.env.REACT_APP_USE_EXCHANGE_MOCK` to `true`.
