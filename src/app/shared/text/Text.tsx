@@ -1,38 +1,38 @@
-import React from 'react';
+import React from "react";
 
-import './Text.scss';
+import styles from "./Text.module.scss";
 
 export enum TextType {
-  Primary = 'text-primary',
-  Secondary = 'text-secondary',
-  Highlight = 'text-highlight',
+  Primary = "text-primary",
+  Secondary = "text-secondary",
+  Highlight = "text-highlight",
 }
 
 export enum TextSize {
-  Small = '0.5',
-  Regular = '1rem',
-  Large = '3rem',
+  Small = "0.5",
+  Regular = "1rem",
+  Large = "3rem",
 }
 
 export interface TextProps {
-  type?: TextType,
-  style?: React.CSSProperties,
-  size?: TextSize,
+  type?: TextType;
+  style?: React.CSSProperties;
+  size?: TextSize;
 }
 
-const Text: React.FC<TextProps> = ({ children, type = TextType.Primary, style, size = TextSize.Regular}) => {
+const Text: React.FC<TextProps> = ({ children, type = TextType.Primary, style, size = TextSize.Regular }) => {
   return (
     <div
-      className={type}
+      className={styles[type]}
       style={{
         ...style,
         fontSize: size,
-        lineHeight: '1.25rem'
+        lineHeight: "1.25rem",
       }}
     >
       {children}
     </div>
-  )
-}
+  );
+};
 
 export default Text;

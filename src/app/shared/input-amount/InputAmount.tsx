@@ -1,6 +1,6 @@
-import React from 'react';
-import { Amount } from '../../../domain/amount';
-import './InputAmount.scss';
+import React from "react";
+import { Amount } from "../../../domain/amount";
+import styles from "./InputAmount.module.scss";
 
 interface InputAmountProps {
   amount: Amount;
@@ -15,20 +15,20 @@ const InputAmount: React.FC<InputAmountProps> = ({ amount, setValue }) => {
     } else {
       setValue(Amount.getValue(+_amount));
     }
-  }
+  };
 
   const getRenderedValue = (str: string) => {
-    return str.replace(/^0+/,'');
-  }
+    return str.replace(/^0+/, "");
+  };
 
   return (
     <input
-      className="input-amount-field"
+      className={styles["input-amount-field"]}
       type="number"
       value={getRenderedValue(amount.value.toString())}
       onChange={handleInput}
     />
-  )
-}
+  );
+};
 
 export default InputAmount;

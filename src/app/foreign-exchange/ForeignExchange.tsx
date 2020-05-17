@@ -12,7 +12,7 @@ import InputAmountDisabled from "../shared/input-amount/InputAmountDisabled";
 import { useInterval } from "../../domain/interval";
 
 import ToggleArrows from "./toggle-arrows.svg";
-import "./ForeignExchange.scss";
+import styles from "./ForeignExchange.module.scss";
 
 const ForeignExchange: React.FC<State> = (props: State) => {
   const [state, dispatch] = useReducer(reducer, props);
@@ -111,7 +111,7 @@ const ForeignExchange: React.FC<State> = (props: State) => {
         </Text>
       </Card>
       <Card color={CardColor.Dark}>
-        <img className="toggle-arrows" src={ToggleArrows} alt="toggle" onClick={toggle} />
+        <img className={styles["toggle-arrows"]} src={ToggleArrows} alt="toggle" onClick={toggle} />
         <div className="space-between">
           <select className="large" value={state.output.currency.id} onChange={handleOutputSelectChange}>
             {currencyOptions(state.input.currency.id)}
