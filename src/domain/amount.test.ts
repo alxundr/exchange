@@ -8,8 +8,8 @@ describe('Amount Component', () => {
     ${1.999}      | ${'€ 2.00'}
     ${null}       | ${'€ 0.00'}
     ${undefined}  | ${'€ 0.00'}
-  `.
-  test('transforms value to amount with currency symbol and 2 fraction digits', ({ value, text }) => {
+  `
+  .test('transforms value to amount with currency symbol and 2 fraction digits', ({ value, text }) => {
     expect(new Amount(value, 'EUR').toString()).toEqual(text);
   });
 
@@ -19,8 +19,8 @@ describe('Amount Component', () => {
     ${1.999}      | ${0.75}    | ${'GBP'}         | ${'£ 1.50'}
     ${null}       | ${0.9}     | ${'GBP'}         | ${'£ 0.00'}
     ${undefined}  | ${0.75}    | ${'EUR'}         | ${'€ 0.00'}
-  `.
-  test('transforms value to exchange', ({ value, rate, targetCurrency, result }) => {
+  `
+  .test('transforms value to exchange', ({ value, rate, targetCurrency, result }) => {
     expect((new Amount(value).toExchange(rate, targetCurrency)).toString()).toEqual(result);
   });
 

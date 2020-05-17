@@ -41,8 +41,8 @@ describe('App Component', () => {
     });
     fetchMock.mock(`${OPEN_EXCHANGE_ENDPOINT}&base=GBP`, {
       rates: {
-        ['EUR']: 1.23,
-        ['USD']: 4.56,
+        'EUR': 1.23,
+        'USD': 4.56,
       }
     });
 
