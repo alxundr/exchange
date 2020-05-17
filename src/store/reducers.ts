@@ -1,11 +1,19 @@
+import isEqual from "lodash.isequal";
 import { Amount } from "../domain/amount";
-import { Action } from "./actions";
+import { AllowedCurrencies } from "../domain/currency";
+import { Rate } from "../domain/rate";
+import { Action, Payload } from "./actions";
 import { State } from "./state";
 
-export const reducer = (state: State, { type, payload }: any) => {
+type ReducerProps = {
+  type: Action;
+  payload: Payload;
+};
+
+export const reducer = (state: State, { type, payload }: ReducerProps): State => {
   switch (type) {
     case Action.SetInputAmount: {
-      const input = new Amount(payload, state.input.currency.id);
+      const input = new Amount(payload.amount as number, state.input.currency.id);
       return {
         ...state,
         input,
@@ -13,7 +21,7 @@ export const reducer = (state: State, { type, payload }: any) => {
       };
     }
     case Action.ChangeInputPocket: {
-      const input = new Amount(0, payload);
+      const input = new Amount(0, payload.currency);
       return {
         ...state,
         input,
@@ -23,18 +31,25 @@ export const reducer = (state: State, { type, payload }: any) => {
     case Action.ChangeOutputCurrency: {
       return {
         ...state,
-        output: state.input.toExchange(state.rates[payload], payload),
+        output: state.input.toExchange(
+          state.rates[payload.currency as AllowedCurrencies],
+          payload.currency as AllowedCurrencies
+        ),
       };
     }
     case Action.UpdateRates:
+      /* istanbul ignore if */
+      if (isEqual(payload.rates, state.rates)) {
+        return state;
+      }
       return {
         ...state,
-        rates: payload,
-        output: state.input.toExchange(payload[state.output.currency.id], state.output.currency.id),
+        rates: payload.rates as Rate,
+        output: state.input.toExchange((payload.rates as Rate)[state.output.currency.id], state.output.currency.id),
       };
     case Action.Toggle: {
-      const input = new Amount(0, payload.input);
-      const output = new Amount(0, payload.output);
+      const input = new Amount(0, payload.inputCurrency);
+      const output = new Amount(0, payload.outputCurrency);
       return {
         ...state,
         input,
@@ -42,13 +57,13 @@ export const reducer = (state: State, { type, payload }: any) => {
       };
     }
     case Action.Exchange: {
-      const { input, output } = payload;
+      const { inputAmount, outputAmount } = payload;
       const pockets = state.pockets.map((pocket) => {
-        if (pocket.currency.id === input.currency.id) {
-          return new Amount(pocket.value - input.value, input.currency.id);
+        if (pocket.currency.id === (inputAmount as Amount).currency.id) {
+          return new Amount(pocket.value - (inputAmount as Amount).value, (inputAmount as Amount).currency.id);
         }
-        if (pocket.currency.id === output.currency.id) {
-          return new Amount(pocket.value + output.value, output.currency.id);
+        if (pocket.currency.id === (outputAmount as Amount).currency.id) {
+          return new Amount(pocket.value + (outputAmount as Amount).value, (outputAmount as Amount).currency.id);
         }
         return pocket;
       });

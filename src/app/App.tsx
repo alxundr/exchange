@@ -9,28 +9,27 @@ import "./App.scss";
 
 const App: React.FC = () => {
   const [initialState, setInitialState] = useState<State>();
-  const [isFetchComplete, setIsFetchComplete] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchData = async () => {
-      const [inputPocket, outputPocket] = await getPockets();
+      const pockets = await getPockets();
+      const [inputPocket, outputPocket] = pockets;
       const rates = await getRatesByCurrency(inputPocket.currency.id);
       const input = new Amount(0, inputPocket.currency.id);
       const output = new Amount(0, outputPocket.currency.id);
       setInitialState({
-        pockets: [inputPocket, outputPocket],
+        pockets,
         input,
         output,
         rates,
       });
-      setIsFetchComplete(true);
     };
-    if (!isFetchComplete) {
+    if (!initialState) {
       fetchData();
     }
-  }, [setInitialState, isFetchComplete, setIsFetchComplete]);
+  }, [setInitialState, initialState]);
 
-  if (!isFetchComplete || !initialState) {
+  if (!initialState) {
     return <div>loading...</div>;
   }
 

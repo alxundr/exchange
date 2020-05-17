@@ -1,5 +1,4 @@
-import React, { useEffect, useReducer, useState } from "react";
-
+import React, { useEffect, useReducer, useState, useMemo, useCallback } from "react";
 import { reducer } from "../../store/reducers";
 import { actionCreators } from "../../store/actions";
 import { Amount } from "../../domain/amount";
@@ -13,6 +12,7 @@ import { useInterval } from "../shared/hooks/interval";
 
 import ToggleArrows from "./toggle-arrows.svg";
 import styles from "./ForeignExchange.module.scss";
+import { AllowedCurrencies } from "src/domain/currency";
 
 const ForeignExchange: React.FC<State> = (props: State) => {
   const [state, dispatch] = useReducer(reducer, props);
@@ -20,15 +20,16 @@ const ForeignExchange: React.FC<State> = (props: State) => {
   const singleInput = new Amount(1, state.input.currency.id);
   const singleOutput = new Amount(1, state.output.currency.id);
 
+  const currentPocketAmount = useMemo(() => {
+    return (state.pockets.find((pocket) => pocket.currency.id === state.input.currency.id) as Amount).value;
+  }, [state.pockets, state.input.currency]);
+
   useEffect(() => {
     const inputValue = state.input.value;
-    setDisabled(
-      inputValue <= 0 ||
-        inputValue > (state.pockets.find((pocket) => pocket.currency.id === state.input.currency.id) as Amount).value
-    );
-  }, [state, setDisabled]);
+    setDisabled(inputValue <= 0 || inputValue > currentPocketAmount);
+  }, [state.input.value, setDisabled, currentPocketAmount]);
 
-  const updateRates = async (currency: string) => {
+  const updateRates = async (currency: AllowedCurrencies) => {
     dispatch(actionCreators.updateRates(await getRatesByCurrency(currency)));
   };
 
@@ -36,7 +37,28 @@ const ForeignExchange: React.FC<State> = (props: State) => {
     await updateRates(state.input.currency.id);
   }, 10000);
 
-  const getPocket = (currency: string): Amount => {
+  const exchangeOptions = useCallback(
+    (pocket: Amount) => {
+      return `${singleInput.toString()} = ${singleInput
+        .toExchange(state.rates[pocket.currency.id], pocket.currency.id)
+        .toString()}`;
+    },
+    [state.rates, singleInput]
+  );
+
+  const currencyOptions = useCallback(
+    (currentCurrency: string) =>
+      state.pockets
+        .filter(({ currency }) => currency.id !== currentCurrency)
+        .map(({ currency }) => (
+          <option value={currency.id} key={currency.id}>
+            {currency.id}
+          </option>
+        )),
+    [state.pockets]
+  );
+
+  const getPocket = (currency: AllowedCurrencies): Amount => {
     return state.pockets.find((pocket) => pocket.currency.id === currency) as Amount;
   };
 
@@ -61,27 +83,6 @@ const ForeignExchange: React.FC<State> = (props: State) => {
     );
   };
 
-  const exchangeOptions = (pockets: Amount[]) => {
-    return pockets
-      .filter(({ currency }) => currency.id !== state.input.currency.id)
-      .map((pocket) => (
-        <option key={pocket.currency.id} value={pocket.currency.id}>
-          {singleInput.toString()} ={" "}
-          {singleInput.toExchange(state.rates[pocket.currency.id], pocket.currency.id).toString()}
-        </option>
-      ));
-  };
-
-  const currencyOptions = (filteredCurrency: string) => {
-    return state.pockets
-      .filter(({ currency }) => currency.id !== filteredCurrency)
-      .map(({ currency }) => (
-        <option value={currency.id} key={currency.id}>
-          {currency.id}
-        </option>
-      ));
-  };
-
   const exchange = () => {
     dispatch(
       actionCreators.exchange({
@@ -95,7 +96,13 @@ const ForeignExchange: React.FC<State> = (props: State) => {
     <React.Fragment>
       <Card>
         <select onChange={handleOutputSelectChange} value={state.output.currency.id}>
-          {exchangeOptions(state.pockets)}
+          {state.pockets
+            .filter(({ currency }) => currency.id !== state.input.currency.id)
+            .map((pocket) => (
+              <option key={pocket.currency.id} value={pocket.currency.id}>
+                {exchangeOptions(pocket)}
+              </option>
+            ))}
         </select>
         <div className="space-between">
           <select className="large" value={state.input.currency.id} onChange={handleInputSelectChange}>

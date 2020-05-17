@@ -16,12 +16,14 @@
     "@types/enzyme": "^3.10.5",
     "@types/enzyme-adapter-react-16": "^1.0.5",
     "@types/jest": "^24.0.0",
+    "@types/lodash.isequal": "^4.5.5",
     "enzyme": "^3.10.0",
     "enzyme-adapter-react-16": "^1.15.1",
     "fetch-mock": "^8.0.1",
     "husky": "^4.2.5",
     "jest-each": "^24.9.0",
     "lint-staged": "^10.2.2",
+    "lodash.isequal": "^4.5.0",
     "node-fetch": "^2.6.0",
     "serve": "^11.2.0",
     "testaged-coverage": "^1.3.1",
@@ -44,6 +46,7 @@
       "src/**/*.tsx",
       "src/**/*.ts",
       "!src/store/state.ts",
+      "!src/domain/rate.ts",
       "!src/react-app-env.d.ts"
     ],
     "coverageThreshold": {

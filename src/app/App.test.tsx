@@ -1,5 +1,5 @@
 import * as React from "react";
-import { mount } from "enzyme";
+import { mount, ReactWrapper } from "enzyme";
 import "whatwg-fetch";
 import fetchMock from "fetch-mock";
 import { act } from "react-dom/test-utils";
@@ -9,12 +9,15 @@ import { Amount } from "../domain/amount";
 import { OPEN_EXCHANGE_ENDPOINT } from "../proxy/rates";
 
 describe("App Component", () => {
+  let app: ReactWrapper;
+
   beforeAll(() => {
     global["fetch"] = fetch;
   });
 
   afterEach(() => {
     jest.clearAllMocks();
+    app.unmount();
   });
 
   afterAll(() => {
@@ -22,7 +25,9 @@ describe("App Component", () => {
   });
 
   test("creates App div", async () => {
-    const app = mount(<App />);
+    await act(async () => {
+      app = mount(<App />);
+    });
     expect(app.find("div").at(0).text()).toContain("loading...");
   });
 
@@ -45,9 +50,6 @@ describe("App Component", () => {
         USD: 4.56,
       },
     });
-
-    let app;
-
     await act(async () => {
       app = mount(<App />);
     });
