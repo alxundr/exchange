@@ -4,18 +4,18 @@ export enum AllowedCurrencies {
   GBP = "GBP",
 }
 
-export class Currency {
+export interface Currency {
   symbol: string;
   id: AllowedCurrencies;
-
-  constructor(id: AllowedCurrencies, symbol: string) {
-    this.id = id;
-    this.symbol = symbol;
-  }
 }
 
-export const CURRENCIES = [
-  new Currency(AllowedCurrencies.USD, "$"),
-  new Currency(AllowedCurrencies.EUR, "€"),
-  new Currency(AllowedCurrencies.GBP, "£"),
-];
+const currencySymbols = {
+  [AllowedCurrencies.USD]: "$",
+  [AllowedCurrencies.EUR]: "€",
+  [AllowedCurrencies.GBP]: "£",
+};
+
+export const getCurrency = (id: AllowedCurrencies): Currency => ({
+  id,
+  symbol: currencySymbols[id],
+});

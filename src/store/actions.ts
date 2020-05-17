@@ -2,7 +2,7 @@ import { AllowedCurrencies } from "src/domain/currency";
 import { Amount } from "src/domain/amount";
 import { Rate } from "src/domain/rate";
 
-export enum Action {
+export enum ActionTypes {
   SetInputAmount,
   ChangeOutputCurrency,
   ChangeInputPocket,
@@ -11,61 +11,66 @@ export enum Action {
   Exchange,
 }
 
-export type Payload = {
-  amount?: number;
-  currency?: AllowedCurrencies;
-  rates?: Rate;
-  inputCurrency?: AllowedCurrencies;
-  outputCurrency?: AllowedCurrencies;
-  inputAmount?: Amount;
-  outputAmount?: Amount;
+type Payload = {
+  amount: number;
+  currency: AllowedCurrencies;
+  rates: Rate;
+  inputCurrency: AllowedCurrencies;
+  outputCurrency: AllowedCurrencies;
+  inputAmount: Amount;
+  outputAmount: Amount;
 };
 
-const setInputAmount = (payload: number) => ({
-  type: Action.SetInputAmount,
+export type Action = {
+  type: ActionTypes;
+  payload: Payload;
+};
+
+const setInputAmount = (amount: number): Action => ({
+  type: ActionTypes.SetInputAmount,
   payload: {
-    amount: payload,
-  },
+    amount,
+  } as Payload,
 });
 
-const changeOutputCurrency = (payload: AllowedCurrencies) => ({
-  type: Action.ChangeOutputCurrency,
+const changeOutputCurrency = (currency: AllowedCurrencies): Action => ({
+  type: ActionTypes.ChangeOutputCurrency,
   payload: {
-    currency: payload,
-  },
+    currency,
+  } as Payload,
 });
 
-const changeInputPocket = (payload: AllowedCurrencies) => ({
-  type: Action.ChangeInputPocket,
+const changeInputPocket = (currency: AllowedCurrencies): Action => ({
+  type: ActionTypes.ChangeInputPocket,
   payload: {
-    currency: payload,
-  },
+    currency,
+  } as Payload,
 });
 
-const updateRates = (payload: { [currency in AllowedCurrencies]: number }) => ({
-  type: Action.UpdateRates,
+const updateRates = (rates: { [currency in AllowedCurrencies]: number }): Action => ({
+  type: ActionTypes.UpdateRates,
   payload: {
-    rates: payload,
-  },
+    rates,
+  } as Payload,
 });
 
-const toggle = ({ input, output }: { [field in "input" | "output"]: AllowedCurrencies }) => ({
-  type: Action.Toggle,
+const toggle = ({ input, output }: { [field in "input" | "output"]: AllowedCurrencies }): Action => ({
+  type: ActionTypes.Toggle,
   payload: {
     inputCurrency: input,
     outputCurrency: output,
-  },
+  } as Payload,
 });
 
-const exchange = ({ input, output }: { [field in "input" | "output"]: Amount }) => ({
-  type: Action.Exchange,
+const exchange = ({ input, output }: { [field in "input" | "output"]: Amount }): Action => ({
+  type: ActionTypes.Exchange,
   payload: {
     inputAmount: input,
     outputAmount: output,
-  },
+  } as Payload,
 });
 
-export const actionCreators = {
+export default {
   setInputAmount,
   changeOutputCurrency,
   changeInputPocket,

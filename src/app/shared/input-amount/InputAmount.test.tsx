@@ -2,7 +2,7 @@ import React from "react";
 import { mount, ReactWrapper } from "enzyme";
 import { act } from "react-dom/test-utils";
 import InputAmount from "./InputAmount";
-import { Amount } from "../../../domain/amount";
+import { getAmount } from "../../../domain/amount";
 
 describe("InputAmount Component", () => {
   let inputAmount: ReactWrapper;
@@ -26,7 +26,7 @@ describe("InputAmount Component", () => {
     const setValue = (newValue: number) => {
       value = newValue;
     };
-    inputAmount = mount(<InputAmount amount={new Amount(value)} setValue={setValue} />);
+    inputAmount = mount(<InputAmount amount={getAmount(value)} onChange={setValue} />);
     updateAmount(-1);
     expect(value).toEqual(-1);
   });
@@ -36,7 +36,7 @@ describe("InputAmount Component", () => {
     const setValue = (newValue: number) => {
       value = newValue;
     };
-    inputAmount = mount(<InputAmount amount={new Amount(value)} setValue={setValue} />);
+    inputAmount = mount(<InputAmount amount={getAmount(value)} onChange={setValue} />);
     updateAmount("");
     expect(value).toEqual(0);
   });

@@ -6,6 +6,7 @@
     "@types/node": "^12.0.0",
     "@types/react": "^16.9.0",
     "@types/react-dom": "^16.9.0",
+    "immer": "^6.0.5",
     "node-sass": "4.12",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
@@ -33,6 +34,7 @@
     "start": "react-scripts start",
     "test": "react-scripts test --coverage --watchAll=false",
     "test:file": "react-scripts test --findRelatedTests",
+    "test:file:debug": "react-scripts --inspect-brk test --watch --no-cache --findRelatedTests",
     "build": "react-scripts build",
     "serve": "yarn build && serve build -l 3000 -s",
     "lint": "eslint src/**/*.ts src/**/*.tsx"

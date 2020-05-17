@@ -1,7 +1,7 @@
-import React, { useEffect, useReducer, useState, useMemo, useCallback } from "react";
-import { reducer } from "../../store/reducers";
-import { actionCreators } from "../../store/actions";
-import { Amount } from "../../domain/amount";
+import React, { useMemo, useCallback, useReducer, Reducer } from "react";
+import { foreignExchangeReducer } from "../../store/reducers";
+import actionCreators, { Action } from "../../store/actions";
+import { getAmount, Amount } from "../../domain/amount";
 import { State } from "../../store/state";
 import { getRatesByCurrency } from "../../proxy/rates";
 import Card, { CardColor } from "../shared/card/Card";
@@ -14,28 +14,16 @@ import ToggleArrows from "./toggle-arrows.svg";
 import styles from "./ForeignExchange.module.scss";
 import { AllowedCurrencies } from "src/domain/currency";
 
+const TIME_AFTER_NEXT_RATES_UPDATE = 10000;
+
 const ForeignExchange: React.FC<State> = (props: State) => {
-  const [state, dispatch] = useReducer(reducer, props);
-  const [disabled, setDisabled] = useState<boolean>(true);
-  const singleInput = new Amount(1, state.input.currency.id);
-  const singleOutput = new Amount(1, state.output.currency.id);
-
-  const currentPocketAmount = useMemo(() => {
-    return (state.pockets.find((pocket) => pocket.currency.id === state.input.currency.id) as Amount).value;
-  }, [state.pockets, state.input.currency]);
-
-  useEffect(() => {
-    const inputValue = state.input.value;
-    setDisabled(inputValue <= 0 || inputValue > currentPocketAmount);
-  }, [state.input.value, setDisabled, currentPocketAmount]);
-
-  const updateRates = async (currency: AllowedCurrencies) => {
-    dispatch(actionCreators.updateRates(await getRatesByCurrency(currency)));
-  };
+  const [state, dispatch] = useReducer<Reducer<State, Action>>(foreignExchangeReducer, props);
+  const singleInput = getAmount(1, state.input.currency.id);
+  const singleOutput = getAmount(1, state.output.currency.id);
 
   useInterval(async () => {
     await updateRates(state.input.currency.id);
-  }, 10000);
+  }, TIME_AFTER_NEXT_RATES_UPDATE);
 
   const exchangeOptions = useCallback(
     (pocket: Amount) => {
@@ -47,10 +35,10 @@ const ForeignExchange: React.FC<State> = (props: State) => {
   );
 
   const currencyOptions = useCallback(
-    (currentCurrency: string) =>
+    (currentCurrency: AllowedCurrencies) =>
       state.pockets
-        .filter(({ currency }) => currency.id !== currentCurrency)
-        .map(({ currency }) => (
+        .filter(({ currency }: Amount) => currency.id !== currentCurrency)
+        .map(({ currency }: Amount) => (
           <option value={currency.id} key={currency.id}>
             {currency.id}
           </option>
@@ -58,8 +46,20 @@ const ForeignExchange: React.FC<State> = (props: State) => {
     [state.pockets]
   );
 
-  const getPocket = (currency: AllowedCurrencies): Amount => {
-    return state.pockets.find((pocket) => pocket.currency.id === currency) as Amount;
+  const getPocket = useCallback(
+    (currency: AllowedCurrencies): Amount => {
+      return state.pockets.find((pocket: Amount) => pocket.currency.id === currency) as Amount;
+    },
+    [state.pockets]
+  );
+
+  const disabled = useMemo(() => {
+    const inputValue = state.input.value;
+    return inputValue <= 0 || inputValue > getPocket(state.input.currency.id).value;
+  }, [state.input.currency.id, state.input.value, getPocket]);
+
+  const updateRates = async (currency: AllowedCurrencies) => {
+    dispatch(actionCreators.updateRates(await getRatesByCurrency(currency)));
   };
 
   const handleOutputSelectChange = (event: any) => {
@@ -93,14 +93,14 @@ const ForeignExchange: React.FC<State> = (props: State) => {
   };
 
   return (
-    <React.Fragment>
+    <>
       <Card>
         <select onChange={handleOutputSelectChange} value={state.output.currency.id}>
           {state.pockets
-            .filter(({ currency }) => currency.id !== state.input.currency.id)
-            .map((pocket) => (
+            .filter(({ currency }: Amount) => currency.id !== state.input.currency.id)
+            .map((pocket: Amount) => (
               <option key={pocket.currency.id} value={pocket.currency.id}>
-                {exchangeOptions(pocket)}
+                {exchangeOptions(pocket as Amount)}
               </option>
             ))}
         </select>
@@ -109,8 +109,9 @@ const ForeignExchange: React.FC<State> = (props: State) => {
             {currencyOptions(state.output.currency.id)}
           </select>
           <InputAmount
-            setValue={(value: number) => dispatch(actionCreators.setInputAmount(value))}
+            onChange={(value: number) => dispatch(actionCreators.setInputAmount(value))}
             amount={state.input}
+            focused={state.input.value === 0}
           />
         </div>
         <Text size={TextSize.Small} type={TextType.Secondary}>
@@ -138,7 +139,7 @@ const ForeignExchange: React.FC<State> = (props: State) => {
           Exchange
         </button>
       </Card>
-    </React.Fragment>
+    </>
   );
 };
 

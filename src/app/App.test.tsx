@@ -5,7 +5,8 @@ import fetchMock from "fetch-mock";
 import { act } from "react-dom/test-utils";
 import App from "./App";
 import ForeignExchange from "./foreign-exchange/ForeignExchange";
-import { Amount } from "../domain/amount";
+import { getAmount } from "../domain/amount";
+import { AllowedCurrencies } from "../domain/currency";
 import { OPEN_EXCHANGE_ENDPOINT } from "../proxy/rates";
 
 describe("App Component", () => {
@@ -31,7 +32,7 @@ describe("App Component", () => {
     expect(app.find("div").at(0).text()).toContain("loading...");
   });
 
-  test("creates ForeignExchange and pass props", async () => {
+  test("creates ForeignExchange and passes props", async () => {
     fetchMock.mock("./data/input.json", {
       pockets: [
         {
@@ -54,14 +55,17 @@ describe("App Component", () => {
       app = mount(<App />);
     });
     app.update();
-    expect(app.find(ForeignExchange).at(0).props()).toEqual({
-      input: new Amount(0, "GBP"),
-      output: new Amount(0, "EUR"),
+    const props = {
+      input: getAmount(0, AllowedCurrencies.GBP),
+      output: getAmount(0, AllowedCurrencies.EUR),
       rates: {
         EUR: 1.23,
         USD: 4.56,
       },
-      pockets: [new Amount(1, "GBP"), new Amount(2, "EUR")],
-    });
+      pockets: [getAmount(1, AllowedCurrencies.GBP), getAmount(2, AllowedCurrencies.EUR)],
+    };
+    expect(app.find(ForeignExchange).props().input.isSame(props.input)).toEqual(true);
+    expect(app.find(ForeignExchange).props().output.isSame(props.output)).toEqual(true);
+    expect(app.find(ForeignExchange).props().rates).toEqual(props.rates);
   });
 });

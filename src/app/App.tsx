@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-import { Amount } from "../domain/amount";
+import { getAmount } from "../domain/amount";
 import { State } from "../store/state";
 import { getRatesByCurrency } from "../proxy/rates";
 import { getPockets } from "../proxy/pockets";
@@ -15,8 +15,8 @@ const App: React.FC = () => {
       const pockets = await getPockets();
       const [inputPocket, outputPocket] = pockets;
       const rates = await getRatesByCurrency(inputPocket.currency.id);
-      const input = new Amount(0, inputPocket.currency.id);
-      const output = new Amount(0, outputPocket.currency.id);
+      const input = getAmount(0, inputPocket.currency.id);
+      const output = getAmount(0, outputPocket.currency.id);
       setInitialState({
         pockets,
         input,

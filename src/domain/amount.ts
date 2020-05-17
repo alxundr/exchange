@@ -1,34 +1,47 @@
-import { CURRENCIES, Currency, AllowedCurrencies } from "./currency";
+import { getCurrency, Currency, AllowedCurrencies } from "./currency";
 
-export class Amount {
-  static getValue(amount: number): number {
-    return +amount.toFixed(2);
-  }
+export interface Amount {
+  value: number;
+  currency: Currency;
+  toString: () => string;
+  toExchange: (rate: number, currencyId: AllowedCurrencies) => Amount;
+  updateValue: (newValue: number) => Amount;
+  reset: (currencyId?: AllowedCurrencies) => Amount;
+  isSame: (anotherAmount: Amount) => boolean;
+}
 
-  get value(): number {
-    return Amount.getValue(this._value);
-  }
+export function getFixedValue(amount: number): number {
+  return +amount.toFixed(2);
+}
 
-  get currency(): Currency {
-    return this._currency;
-  }
+export function getAmount(value: number, currencyId: AllowedCurrencies = AllowedCurrencies.GBP): Amount {
+  const currency = getCurrency(currencyId);
+  const parsedValue = value || 0;
 
-  private _value: number;
-  private _currency: Currency;
-
-  constructor(value: number, currencyId?: AllowedCurrencies) {
-    this._value = value || 0;
-    this._currency = CURRENCIES.find(({ id }) => id === currencyId) || CURRENCIES[0];
-  }
-
-  toString(): string {
-    return `${this.currency.symbol} ${this.value.toLocaleString("en-US", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })}`;
-  }
-
-  toExchange(rate: number, currencyId: AllowedCurrencies): Amount {
-    return new Amount(rate * this.value, currencyId);
-  }
+  return {
+    value: getFixedValue(parsedValue),
+    currency,
+    toString() {
+      return `${this.currency.symbol} ${this.value.toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })}`;
+    },
+    toExchange(rate: number, currencyId: AllowedCurrencies) {
+      return getAmount(rate * this.value, currencyId);
+    },
+    updateValue(newValue: number) {
+      this.value = getFixedValue(newValue);
+      return this;
+    },
+    reset(currencyId?: AllowedCurrencies) {
+      if (currencyId !== undefined) {
+        this.currency = getCurrency(currencyId);
+      }
+      return this.updateValue(0);
+    },
+    isSame(anotherAmount: Amount) {
+      return this.value === anotherAmount.value && this.currency.id === anotherAmount.currency.id;
+    },
+  };
 }

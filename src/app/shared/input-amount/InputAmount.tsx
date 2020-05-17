@@ -1,32 +1,38 @@
-import React from "react";
-import { Amount } from "../../../domain/amount";
+import React, { useEffect, useRef } from "react";
+import { Amount, getFixedValue } from "../../../domain/amount";
 import styles from "./InputAmount.module.scss";
 
 interface InputAmountProps {
   amount: Amount;
-  setValue: (value: number) => void;
+  focused?: boolean;
+  onChange: (value: number) => void;
 }
 
-const InputAmount: React.FC<InputAmountProps> = ({ amount, setValue }) => {
-  const handleInput = (event: any) => {
+const InputAmount: React.FC<InputAmountProps> = ({ amount, onChange, focused = false }) => {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (inputRef.current && focused) {
+      inputRef.current.focus();
+    }
+  }, [focused]);
+
+  const convertToNumber = (event: any) => {
     const _amount = event.currentTarget.value;
     if (!_amount || !/^[-+]?(\d+|\d+\.\d*|\d*\.\d+)$/.test(_amount)) {
-      setValue(0);
+      onChange(0);
     } else {
-      setValue(Amount.getValue(+_amount));
+      onChange(getFixedValue(+_amount));
     }
-  };
-
-  const getRenderedValue = (str: string) => {
-    return str.replace(/^0+/, "");
   };
 
   return (
     <input
+      ref={inputRef}
       className={styles["input-amount-field"]}
       type="number"
-      value={getRenderedValue(amount.value.toString())}
-      onChange={handleInput}
+      value={amount.value.toString()}
+      onChange={convertToNumber}
     />
   );
 };

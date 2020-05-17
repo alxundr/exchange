@@ -1,79 +1,56 @@
 import isEqual from "lodash.isequal";
-import { Amount } from "../domain/amount";
-import { AllowedCurrencies } from "../domain/currency";
 import { Rate } from "../domain/rate";
-import { Action, Payload } from "./actions";
+import { getCurrency } from "../domain/currency";
+import { ActionTypes, Action } from "./actions";
 import { State } from "./state";
+import produce, { Draft } from "immer";
 
-type ReducerProps = {
-  type: Action;
-  payload: Payload;
-};
-
-export const reducer = (state: State, { type, payload }: ReducerProps): State => {
+export const foreignExchangeReducer = produce((draft: Draft<State>, { type, payload }: Action) => {
   switch (type) {
-    case Action.SetInputAmount: {
-      const input = new Amount(payload.amount as number, state.input.currency.id);
-      return {
-        ...state,
-        input,
-        output: input.toExchange(state.rates[state.output.currency.id], state.output.currency.id),
-      };
+    case ActionTypes.SetInputAmount: {
+      draft.input.updateValue(payload.amount);
+      draft.output.updateValue(draft.rates[draft.output.currency.id] * draft.input.value);
+      break;
     }
-    case Action.ChangeInputPocket: {
-      const input = new Amount(0, payload.currency);
-      return {
-        ...state,
-        input,
-        output: new Amount(0, state.output.currency.id),
-      };
+    case ActionTypes.ChangeInputPocket: {
+      draft.input.reset(payload.currency);
+      draft.output.reset();
+      break;
     }
-    case Action.ChangeOutputCurrency: {
-      return {
-        ...state,
-        output: state.input.toExchange(
-          state.rates[payload.currency as AllowedCurrencies],
-          payload.currency as AllowedCurrencies
-        ),
-      };
+    case ActionTypes.ChangeOutputCurrency: {
+      draft.output.updateValue(draft.rates[payload.currency] * draft.input.value);
+      draft.output.currency = getCurrency(payload.currency);
+      break;
     }
-    case Action.UpdateRates:
-      /* istanbul ignore if */
-      if (isEqual(payload.rates, state.rates)) {
-        return state;
+    case ActionTypes.UpdateRates:
+      /* istanbul ignore else */
+      if (!isEqual(payload.rates, draft.rates)) {
+        const rates = payload.rates as Rate;
+        draft.rates = rates;
+        draft.output.updateValue(rates[draft.output.currency.id] * draft.input.value);
       }
-      return {
-        ...state,
-        rates: payload.rates as Rate,
-        output: state.input.toExchange((payload.rates as Rate)[state.output.currency.id], state.output.currency.id),
-      };
-    case Action.Toggle: {
-      const input = new Amount(0, payload.inputCurrency);
-      const output = new Amount(0, payload.outputCurrency);
-      return {
-        ...state,
-        input,
-        output,
-      };
+      break;
+    case ActionTypes.Toggle: {
+      draft.input.reset(payload.inputCurrency);
+      draft.output.reset(payload.outputCurrency);
+      break;
     }
-    case Action.Exchange: {
+    case ActionTypes.Exchange: {
       const { inputAmount, outputAmount } = payload;
-      const pockets = state.pockets.map((pocket) => {
-        if (pocket.currency.id === (inputAmount as Amount).currency.id) {
-          return new Amount(pocket.value - (inputAmount as Amount).value, (inputAmount as Amount).currency.id);
+      draft.pockets.forEach((pocket, index) => {
+        if (pocket.currency.id === inputAmount.currency.id) {
+          const newValue = pocket.value - inputAmount.value;
+          pocket.updateValue(newValue);
+          if (newValue <= inputAmount.value) {
+            draft.input.updateValue(newValue);
+            draft.output.updateValue(draft.rates[draft.output.currency.id] * draft.input.value);
+          }
         }
-        if (pocket.currency.id === (outputAmount as Amount).currency.id) {
-          return new Amount(pocket.value + (outputAmount as Amount).value, (outputAmount as Amount).currency.id);
+        if (pocket.currency.id === outputAmount.currency.id) {
+          pocket.updateValue(pocket.value + outputAmount.value);
         }
-        return pocket;
       });
-      return {
-        ...state,
-        pockets,
-      };
+      break;
     }
-    /* istanbul ignore next */
-    default:
-      return state;
   }
-};
+});
