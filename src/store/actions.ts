@@ -22,7 +22,7 @@ const changeInputPocket = (payload: string) => ({
   payload,
 });
 
-const updateRates = (payload: {[currency: string]: number}) => ({
+const updateRates = (payload: { [currency: string]: number }) => ({
   type: Action.UpdateRates,
   payload,
 });
@@ -32,7 +32,7 @@ const toggle = ({ input, output }: any) => ({
   payload: {
     input,
     output,
-  }
+  },
 });
 
 const exchange = ({ input, output }: any) => ({
@@ -40,8 +40,8 @@ const exchange = ({ input, output }: any) => ({
   payload: {
     input,
     output,
-  }
-})
+  },
+});
 
 export const actionCreators = {
   setInputAmount,
@@ -50,4 +50,4 @@ export const actionCreators = {
   updateRates,
   toggle,
   exchange,
-}
+};

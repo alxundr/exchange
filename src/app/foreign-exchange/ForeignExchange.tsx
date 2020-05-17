@@ -1,15 +1,15 @@
 import React, { useEffect, useReducer, useState } from "react";
 
-import { reducer } from "../../domain/reducers";
-import { actionCreators } from "../../domain/actions";
+import { reducer } from "../../store/reducers";
+import { actionCreators } from "../../store/actions";
 import { Amount } from "../../domain/amount";
-import { State } from "../../domain/state";
+import { State } from "../../store/state";
 import { getRatesByCurrency } from "../../proxy/rates";
 import Card, { CardColor } from "../shared/card/Card";
 import Text, { TextSize, TextType } from "../shared/text/Text";
 import InputAmount from "../shared/input-amount/InputAmount";
 import InputAmountDisabled from "../shared/input-amount/InputAmountDisabled";
-import { useInterval } from "../../domain/interval";
+import { useInterval } from "../shared/hooks/interval";
 
 import ToggleArrows from "./toggle-arrows.svg";
 import styles from "./ForeignExchange.module.scss";
@@ -33,7 +33,7 @@ const ForeignExchange: React.FC<State> = (props: State) => {
   };
 
   useInterval(async () => {
-    updateRates(state.input.currency.id);
+    await updateRates(state.input.currency.id);
   }, 10000);
 
   const getPocket = (currency: string): Amount => {
@@ -44,15 +44,15 @@ const ForeignExchange: React.FC<State> = (props: State) => {
     dispatch(actionCreators.changeOutputCurrency(event.target.value));
   };
 
-  const handleInputSelectChange = (event: any) => {
+  const handleInputSelectChange = async (event: any) => {
     const currency = event.target.value;
-    updateRates(currency);
+    await updateRates(currency);
     dispatch(actionCreators.changeInputPocket(currency));
   };
 
-  const toggle = () => {
+  const toggle = async () => {
     const { input, output } = state;
-    updateRates(output.currency.id);
+    await updateRates(output.currency.id);
     dispatch(
       actionCreators.toggle({
         input: output.currency.id,

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 import { Amount } from "../domain/amount";
-import { State } from "../domain/state";
+import { State } from "../store/state";
 import { getRatesByCurrency } from "../proxy/rates";
 import { getPockets } from "../proxy/pockets";
 import ForeignExchange from "./foreign-exchange/ForeignExchange";

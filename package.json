@@ -30,6 +30,7 @@
   "scripts": {
     "start": "react-scripts start",
     "test": "react-scripts test --coverage --watchAll=false",
+    "test:file": "react-scripts test --findRelatedTests",
     "build": "react-scripts build",
     "serve": "yarn build && serve build -l 3000 -s",
     "lint": "eslint src/**/*.ts src/**/*.tsx"
@@ -42,7 +43,7 @@
       "!src/index.tsx",
       "src/**/*.tsx",
       "src/**/*.ts",
-      "!src/domain/state.ts",
+      "!src/store/state.ts",
       "!src/react-app-env.d.ts"
     ],
     "coverageThreshold": {
