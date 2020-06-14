@@ -37,7 +37,8 @@
     "test:file:debug": "react-scripts --inspect-brk test --watch --no-cache --findRelatedTests",
     "build": "react-scripts build",
     "serve": "yarn build && serve build -l 3000 -s",
-    "lint": "eslint src/**/*.ts src/**/*.tsx"
+    "lint": "eslint src/**/*.ts src/**/*.tsx",
+    "testaged-coverage": "testaged-coverage"
   },
   "engines": {
     "node": "<=10.x"
@@ -65,7 +66,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "node ./node_modules/testaged-coverage && lint-staged"
+      "pre-commit": "testaged-coverage && lint-staged"
     }
   },
   "browserslist": {
