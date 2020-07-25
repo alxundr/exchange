@@ -1,8 +1,10 @@
+# Exchange
+
 ## Before start
 
-# You need NodeJS (v10.13.5 would be advisable, specially for the node-sass dependency), and `npm` or `yarn` to be installed.
+You need NodeJS (v10.13.5 would be advisable, specially for the node-sass dependency), and `npm` or `yarn` to be installed.
 
-### `yarn` or `npm i` will install all dependencies.
+`yarn` or `npm i` will install all dependencies.
 
 ## To start
 
