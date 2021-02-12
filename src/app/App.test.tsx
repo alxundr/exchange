@@ -9,9 +9,30 @@ import { getAmount } from "../domain/amount";
 import { AllowedCurrencies } from "../domain/currency";
 import { OPEN_EXCHANGE_ENDPOINT } from "../proxy/rates";
 
-describe("App Component", () => {
-  let app: ReactWrapper;
+import { QueryClient, QueryClientProvider } from "react-query";
 
+let app: ReactWrapper;
+
+const renderApp = async () => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        refetchOnWindowFocus: false,
+        retry: false,
+      },
+    },
+  });
+
+  await act(async () => {
+    app = mount(
+      <QueryClientProvider client={queryClient}>
+        <App />
+      </QueryClientProvider>
+    );
+  });
+};
+
+describe("App Component", () => {
   beforeAll(() => {
     global["fetch"] = fetch;
   });
@@ -25,10 +46,8 @@ describe("App Component", () => {
     fetchMock.restore();
   });
 
-  test("creates App div", async () => {
-    await act(async () => {
-      app = mount(<App />);
-    });
+  test("shows loading", async () => {
+    await renderApp();
     expect(app.find("div").at(0).text()).toContain("loading...");
   });
 
@@ -51,9 +70,7 @@ describe("App Component", () => {
         USD: 4.56,
       },
     });
-    await act(async () => {
-      app = mount(<App />);
-    });
+    await renderApp();
     app.update();
     const props = {
       input: getAmount(0, AllowedCurrencies.GBP),

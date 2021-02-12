@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useQuery } from "react-query";
 
 import { getAmount } from "../domain/amount";
 import { State } from "../store/state";
@@ -8,13 +9,15 @@ import ForeignExchange from "./foreign-exchange/ForeignExchange";
 import "./App.scss";
 
 const App: React.FC = () => {
+  const { data: pockets = [] } = useQuery("pockets", getPockets);
+  const [inputPocket, outputPocket] = pockets;
+  const { data: rates } = useQuery("rates", () => getRatesByCurrency(inputPocket.currency.id), {
+    enabled: pockets.length > 1,
+  });
   const [initialState, setInitialState] = useState<State>();
 
   useEffect(() => {
-    const fetchData = async () => {
-      const pockets = await getPockets();
-      const [inputPocket, outputPocket] = pockets;
-      const rates = await getRatesByCurrency(inputPocket.currency.id);
+    if (rates !== undefined) {
       const input = getAmount(0, inputPocket.currency.id);
       const output = getAmount(0, outputPocket.currency.id);
       setInitialState({
@@ -23,11 +26,8 @@ const App: React.FC = () => {
         output,
         rates,
       });
-    };
-    if (!initialState) {
-      fetchData();
     }
-  }, [setInitialState, initialState]);
+  }, [inputPocket.currency.id, outputPocket.currency.id, pockets, rates]);
 
   if (!initialState) {
     return <div>loading...</div>;

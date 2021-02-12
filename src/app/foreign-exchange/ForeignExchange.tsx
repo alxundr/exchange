@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback, useReducer, Reducer } from "react";
+import React, { useReducer, Reducer } from "react";
 import { foreignExchangeReducer } from "../../store/reducers";
 import actionCreators, { Action } from "../../store/actions";
 import { getAmount, Amount } from "../../domain/amount";
@@ -16,6 +16,20 @@ import { AllowedCurrencies } from "src/domain/currency";
 
 const TIME_AFTER_NEXT_RATES_UPDATE = 10000;
 
+const CurrencyOptions = ({ pockets, currentCurrency }: { pockets: Amount[]; currentCurrency: AllowedCurrencies }) => {
+  return (
+    <>
+      {pockets
+        .filter(({ currency }: Amount) => currency.id !== currentCurrency)
+        .map(({ currency }: Amount) => (
+          <option value={currency.id} key={currency.id}>
+            {currency.id}
+          </option>
+        ))}
+    </>
+  );
+};
+
 const ForeignExchange: React.FC<State> = (props: State) => {
   const [state, dispatch] = useReducer<Reducer<State, Action>>(foreignExchangeReducer, props);
   const singleInput = getAmount(1, state.input.currency.id);
@@ -25,38 +39,19 @@ const ForeignExchange: React.FC<State> = (props: State) => {
     await updateRates(state.input.currency.id);
   }, TIME_AFTER_NEXT_RATES_UPDATE);
 
-  const exchangeOptions = useCallback(
-    (pocket: Amount) => {
-      return `${singleInput.toString()} = ${singleInput
-        .toExchange(state.rates[pocket.currency.id], pocket.currency.id)
-        .toString()}`;
-    },
-    [state.rates, singleInput]
-  );
+  const exchangeOptions = (pocket: Amount) => {
+    return `${singleInput.toString()} = ${singleInput
+      .toExchange(state.rates[pocket.currency.id], pocket.currency.id)
+      .toString()}`;
+  };
 
-  const currencyOptions = useCallback(
-    (currentCurrency: AllowedCurrencies) =>
-      state.pockets
-        .filter(({ currency }: Amount) => currency.id !== currentCurrency)
-        .map(({ currency }: Amount) => (
-          <option value={currency.id} key={currency.id}>
-            {currency.id}
-          </option>
-        )),
-    [state.pockets]
-  );
+  const getPocket = (currency: AllowedCurrencies): Amount => {
+    return state.pockets.find((pocket: Amount) => pocket.currency.id === currency) as Amount;
+  };
 
-  const getPocket = useCallback(
-    (currency: AllowedCurrencies): Amount => {
-      return state.pockets.find((pocket: Amount) => pocket.currency.id === currency) as Amount;
-    },
-    [state.pockets]
-  );
+  const inputValue = state.input.value;
 
-  const disabled = useMemo(() => {
-    const inputValue = state.input.value;
-    return inputValue <= 0 || inputValue > getPocket(state.input.currency.id).value;
-  }, [state.input.currency.id, state.input.value, getPocket]);
+  const disabled = inputValue <= 0 || inputValue > getPocket(state.input.currency.id).value;
 
   const updateRates = async (currency: AllowedCurrencies) => {
     dispatch(actionCreators.updateRates(await getRatesByCurrency(currency)));
@@ -100,13 +95,13 @@ const ForeignExchange: React.FC<State> = (props: State) => {
             .filter(({ currency }: Amount) => currency.id !== state.input.currency.id)
             .map((pocket: Amount) => (
               <option key={pocket.currency.id} value={pocket.currency.id}>
-                {exchangeOptions(pocket as Amount)}
+                {exchangeOptions(pocket)}
               </option>
             ))}
         </select>
         <div className="space-between">
           <select className="large" value={state.input.currency.id} onChange={handleInputSelectChange}>
-            {currencyOptions(state.output.currency.id)}
+            <CurrencyOptions pockets={state.pockets} currentCurrency={state.output.currency.id} />
           </select>
           <InputAmount
             onChange={(value: number) => dispatch(actionCreators.setInputAmount(value))}
@@ -122,7 +117,7 @@ const ForeignExchange: React.FC<State> = (props: State) => {
         <img className={styles["toggle-arrows"]} src={ToggleArrows} alt="toggle" onClick={toggle} />
         <div className="space-between">
           <select className="large" value={state.output.currency.id} onChange={handleOutputSelectChange}>
-            {currencyOptions(state.input.currency.id)}
+            <CurrencyOptions pockets={state.pockets} currentCurrency={state.input.currency.id} />
           </select>
           <InputAmountDisabled amount={state.output} />
         </div>
