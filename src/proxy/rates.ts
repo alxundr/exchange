@@ -1,5 +1,5 @@
 import { Rate } from "../domain/rate";
-import { AllowedCurrencies } from "src/domain/currency";
+import { AllowedCurrencies } from "domain/currency";
 export const OPEN_EXCHANGE_ENDPOINT = `https://openexchangerates.org/api/latest.json?app_id=${process.env.REACT_APP_EXCHANGE_ID}`;
 
 const endpoint = (currency: string) => {

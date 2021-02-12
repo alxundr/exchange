@@ -1,6 +1,6 @@
 import isEqual from "lodash.isequal";
-import { Rate } from "../domain/rate";
-import { getCurrency } from "../domain/currency";
+import { Rate } from "domain/rate";
+import { getCurrency } from "domain/currency";
 import { ActionTypes, Action } from "./actions";
 import { State } from "./state";
 import produce, { Draft } from "immer";

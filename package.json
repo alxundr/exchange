@@ -45,6 +45,11 @@
     "node": "<=10.x"
   },
   "jest": {
+    "moduleNameMapper": {
+      "domain/(.*)": "<rootDir>/src/domain/$1",
+      "store/(.*)": "<rootDir>/src/store/$1",
+      "proxy/(.*)": "<rootDir>/src/proxy/$1"
+    },
     "collectCoverageFrom": [
       "!src/index.tsx",
       "src/**/*.tsx",

@@ -1,5 +1,5 @@
-import { Amount, getAmount } from "../domain/amount";
-import { AllowedCurrencies } from "../domain/currency";
+import { Amount, getAmount } from "domain/amount";
+import { AllowedCurrencies } from "domain/currency";
 
 type Pocket = {
   amount: number;

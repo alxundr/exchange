@@ -1,18 +1,17 @@
 import React, { useReducer, Reducer } from "react";
-import { foreignExchangeReducer } from "../../store/reducers";
-import actionCreators, { Action } from "../../store/actions";
-import { getAmount, Amount } from "../../domain/amount";
-import { State } from "../../store/state";
-import { getRatesByCurrency } from "../../proxy/rates";
-import Card, { CardColor } from "../shared/card/Card";
-import Text, { TextSize, TextType } from "../shared/text/Text";
-import InputAmount from "../shared/input-amount/InputAmount";
-import InputAmountDisabled from "../shared/input-amount/InputAmountDisabled";
+import { foreignExchangeReducer } from "store/reducers";
+import actionCreators, { Action } from "store/actions";
+import { getAmount, Amount } from "domain/amount";
+import { State } from "store/state";
+import { getRatesByCurrency } from "proxy/rates";
+import Card, { CardColor } from "../shared/components/Card";
+import Text, { TextSize, TextType } from "../shared/components/Text";
+import InputAmount, { InputAmountDisabled } from "../shared/components/InputAmount";
 import { useInterval } from "../shared/hooks/interval";
 
-import ToggleArrows from "./toggle-arrows.svg";
+import ToggleArrows from "assets/toggle-arrows.svg";
 import styles from "./ForeignExchange.module.scss";
-import { AllowedCurrencies } from "src/domain/currency";
+import { AllowedCurrencies } from "domain/currency";
 
 const TIME_AFTER_NEXT_RATES_UPDATE = 10000;
 

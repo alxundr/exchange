@@ -2,7 +2,7 @@ import React from "react";
 import { mount, ReactWrapper } from "enzyme";
 import { act } from "react-dom/test-utils";
 import InputAmount from "./InputAmount";
-import { getAmount } from "../../../domain/amount";
+import { getAmount } from "../../../../domain/amount";
 
 describe("InputAmount Component", () => {
   let inputAmount: ReactWrapper;

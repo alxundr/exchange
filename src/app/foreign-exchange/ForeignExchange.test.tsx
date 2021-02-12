@@ -8,10 +8,10 @@ import { getAmount } from "../../domain/amount";
 import { AllowedCurrencies } from "../../domain/currency";
 import { State } from "../../store/state";
 import ForeignExchange from "./ForeignExchange";
-import InputAmount from "../shared/input-amount/InputAmount";
-import Text from "../shared/text/Text";
+import InputAmount from "../shared/components/InputAmount";
+import Text from "../shared/components/Text";
 import { OPEN_EXCHANGE_ENDPOINT } from "../../proxy/rates";
-import InputAmountDisabled from "../shared/input-amount/InputAmountDisabled";
+import { InputAmountDisabled } from "../shared/components/InputAmount";
 
 describe("ForeignExchange", () => {
   const initialState = (): State => ({

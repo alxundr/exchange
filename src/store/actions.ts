@@ -1,6 +1,6 @@
-import { AllowedCurrencies } from "src/domain/currency";
-import { Amount } from "src/domain/amount";
-import { Rate } from "src/domain/rate";
+import { AllowedCurrencies } from "domain/currency";
+import { Amount } from "domain/amount";
+import { Rate } from "domain/rate";
 
 export enum ActionTypes {
   SetInputAmount,

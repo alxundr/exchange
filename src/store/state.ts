@@ -1,5 +1,5 @@
-import { Amount } from "../domain/amount";
-import { Rate } from "../domain/rate";
+import { Amount } from "domain/amount";
+import { Rate } from "domain/rate";
 
 export interface State {
   pockets: Amount[];

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { Amount, getFixedValue } from "../../../domain/amount";
+import { Amount, getFixedValue } from "domain/amount";
 import styles from "./InputAmount.module.scss";
 
 interface InputAmountProps {
