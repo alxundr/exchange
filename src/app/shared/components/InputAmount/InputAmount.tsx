@@ -19,6 +19,10 @@ const InputAmount: React.FC<InputAmountProps> = ({ amount, onChange, alt, focuse
     }
   }, [focused]);
 
+  useEffect(() => {
+    setCurrentInputValue(amount.value);
+  }, [amount.value]);
+
   const convertToNumber = (event: any) => {
     const _amount = event.target.value;
     let newValue;
@@ -27,7 +31,6 @@ const InputAmount: React.FC<InputAmountProps> = ({ amount, onChange, alt, focuse
     } else {
       newValue = getFixedValue(+_amount);
     }
-    setCurrentInputValue(newValue);
     onChange(newValue);
   };
 

@@ -1,4 +1,4 @@
-import React, { useReducer, Reducer } from "react";
+import React, { useReducer, Reducer, useEffect, useRef } from "react";
 import { foreignExchangeReducer } from "store/reducers";
 import { Action, createBindedActions } from "store/actions";
 import { getAmount, Amount } from "domain/amount";
@@ -33,55 +33,45 @@ const ForeignExchange: React.FC<State> = (props: State) => {
   const [state, dispatch] = useReducer<Reducer<State, Action>>(foreignExchangeReducer, props);
   const singleInput = getAmount(1, state.input.currency.id);
   const singleOutput = getAmount(1, state.output.currency.id);
+  const inputValue = state.input.value;
+  const disabledExchangeButton = inputValue <= 0 || inputValue > getPocket(state.input.currency.id).value;
+  const isFirstRatesRequest = useRef(true);
   const actions = createBindedActions(dispatch);
 
-  useInterval(async () => {
-    await updateRates(state.input.currency.id);
+  useInterval(() => {
+    updateRates(state.input.currency.id);
   }, TIME_AFTER_NEXT_RATES_UPDATE);
 
-  const exchangeOptions = (pocket: Amount) => {
+  useEffect(() => {
+    if (!isFirstRatesRequest.current) {
+      updateRates(state.input.currency.id);
+    } else {
+      isFirstRatesRequest.current = false;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.input.currency.id]);
+
+  function exchangeOptions(pocket: Amount) {
     return `${singleInput.toString()} = ${singleInput
       .toExchange(state.rates[pocket.currency.id], pocket.currency.id)
       .toString()}`;
-  };
+  }
 
-  const getPocket = (currency: AllowedCurrencies): Amount => {
+  function getPocket(currency: AllowedCurrencies): Amount {
     return state.pockets.find((pocket: Amount) => pocket.currency.id === currency) as Amount;
-  };
+  }
 
-  const inputValue = state.input.value;
+  async function updateRates(inputCurrency: AllowedCurrencies) {
+    actions.updateRates(await getRatesByCurrency(inputCurrency));
+  }
 
-  const disabled = inputValue <= 0 || inputValue > getPocket(state.input.currency.id).value;
-
-  const updateRates = async (currency: AllowedCurrencies) => {
-    actions.updateRates(await getRatesByCurrency(currency));
-  };
-
-  const handleOutputSelectChange = (event: any) => {
+  function handleOutputSelectChange(event: any) {
     actions.changeOutputCurrency(event.target.value);
-  };
+  }
 
-  const handleInputSelectChange = async (event: any) => {
-    const currency = event.target.value;
-    await updateRates(currency);
-    actions.changeInputPocket(currency);
-  };
-
-  const toggle = async () => {
-    const { input, output } = state;
-    await updateRates(output.currency.id);
-    actions.toggle({
-      input: output.currency.id,
-      output: input.currency.id,
-    });
-  };
-
-  const exchange = () => {
-    actions.exchange({
-      input: state.input,
-      output: state.output,
-    });
-  };
+  function handleInputSelectChange(event: any) {
+    actions.changeInputPocket(event.target.value);
+  }
 
   return (
     <>
@@ -116,7 +106,7 @@ const ForeignExchange: React.FC<State> = (props: State) => {
         </Text>
       </Card>
       <Card color={CardColor.Dark}>
-        <img className={styles["toggle-arrows"]} src={ToggleArrows} alt="toggle" onClick={toggle} />
+        <img className={styles["toggle-arrows"]} src={ToggleArrows} alt="toggle" onClick={actions.toggle} />
         <div className="space-between">
           <select
             data-testid="output-currency-select"
@@ -137,7 +127,12 @@ const ForeignExchange: React.FC<State> = (props: State) => {
             {singleOutput.toExchange(1 / state.rates[state.output.currency.id], state.input.currency.id).toString()}
           </Text>
         </div>
-        <button type="button" style={{ margin: "2rem 1rem 0" }} onClick={exchange} disabled={disabled}>
+        <button
+          type="button"
+          style={{ margin: "2rem 1rem 0" }}
+          onClick={actions.exchange}
+          disabled={disabledExchangeButton}
+        >
           Exchange
         </button>
       </Card>

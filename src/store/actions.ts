@@ -54,22 +54,16 @@ const updateRates = (rates: { [currency in AllowedCurrencies]: number }): Action
   } as Payload,
 });
 
-const toggle = ({ input, output }: { [field in "input" | "output"]: AllowedCurrencies }): Action => {
+const toggle = (): Action => {
   return {
     type: ActionTypes.Toggle,
-    payload: {
-      inputCurrency: input,
-      outputCurrency: output,
-    } as Payload,
+    payload: {} as Payload,
   };
 };
 
-const exchange = ({ input, output }: { [field in "input" | "output"]: Amount }): Action => ({
+const exchange = (): Action => ({
   type: ActionTypes.Exchange,
-  payload: {
-    inputAmount: input,
-    outputAmount: output,
-  } as Payload,
+  payload: {} as Payload,
 });
 
 const bindedAction = (dispatch: Function) => (actionCreator: Function) => (...args: any[]) => {

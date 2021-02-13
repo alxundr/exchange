@@ -31,13 +31,16 @@ export const foreignExchangeReducer = produce((draft: Draft<State>, { type, payl
       }
       break;
     case ActionTypes.Toggle: {
-      draft.input.reset(payload.inputCurrency);
-      draft.output.reset(payload.outputCurrency);
+      const { input, output } = draft;
+      const newInputCurrency = output.currency.id;
+      const newOutputCurrency = input.currency.id;
+      draft.input.reset(newInputCurrency);
+      draft.output.reset(newOutputCurrency);
       break;
     }
     case ActionTypes.Exchange: {
-      const { inputAmount, outputAmount } = payload;
-      draft.pockets.forEach((pocket, index) => {
+      const { input: inputAmount, output: outputAmount } = draft;
+      draft.pockets.forEach((pocket) => {
         if (pocket.currency.id === inputAmount.currency.id) {
           const newValue = pocket.value - inputAmount.value;
           pocket.updateValue(newValue);
