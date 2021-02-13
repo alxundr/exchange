@@ -1,6 +1,6 @@
 import React, { useReducer, Reducer } from "react";
 import { foreignExchangeReducer } from "store/reducers";
-import actionCreators, { Action } from "store/actions";
+import { Action, createBindedActions } from "store/actions";
 import { getAmount, Amount } from "domain/amount";
 import { State } from "store/state";
 import { getRatesByCurrency } from "proxy/rates";
@@ -33,6 +33,7 @@ const ForeignExchange: React.FC<State> = (props: State) => {
   const [state, dispatch] = useReducer<Reducer<State, Action>>(foreignExchangeReducer, props);
   const singleInput = getAmount(1, state.input.currency.id);
   const singleOutput = getAmount(1, state.output.currency.id);
+  const actions = createBindedActions(dispatch);
 
   useInterval(async () => {
     await updateRates(state.input.currency.id);
@@ -53,37 +54,33 @@ const ForeignExchange: React.FC<State> = (props: State) => {
   const disabled = inputValue <= 0 || inputValue > getPocket(state.input.currency.id).value;
 
   const updateRates = async (currency: AllowedCurrencies) => {
-    dispatch(actionCreators.updateRates(await getRatesByCurrency(currency)));
+    actions.updateRates(await getRatesByCurrency(currency));
   };
 
   const handleOutputSelectChange = (event: any) => {
-    dispatch(actionCreators.changeOutputCurrency(event.target.value));
+    actions.changeOutputCurrency(event.target.value);
   };
 
   const handleInputSelectChange = async (event: any) => {
     const currency = event.target.value;
     await updateRates(currency);
-    dispatch(actionCreators.changeInputPocket(currency));
+    actions.changeInputPocket(currency);
   };
 
   const toggle = async () => {
     const { input, output } = state;
     await updateRates(output.currency.id);
-    dispatch(
-      actionCreators.toggle({
-        input: output.currency.id,
-        output: input.currency.id,
-      })
-    );
+    actions.toggle({
+      input: output.currency.id,
+      output: input.currency.id,
+    });
   };
 
   const exchange = () => {
-    dispatch(
-      actionCreators.exchange({
-        input: state.input,
-        output: state.output,
-      })
-    );
+    actions.exchange({
+      input: state.input,
+      output: state.output,
+    });
   };
 
   return (
@@ -109,7 +106,7 @@ const ForeignExchange: React.FC<State> = (props: State) => {
           </select>
           <InputAmount
             alt="input amount"
-            onChange={(value: number) => dispatch(actionCreators.setInputAmount(value))}
+            onChange={actions.setInputAmount}
             amount={state.input}
             focused={state.input.value === 0}
           />

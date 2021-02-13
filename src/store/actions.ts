@@ -54,13 +54,15 @@ const updateRates = (rates: { [currency in AllowedCurrencies]: number }): Action
   } as Payload,
 });
 
-const toggle = ({ input, output }: { [field in "input" | "output"]: AllowedCurrencies }): Action => ({
-  type: ActionTypes.Toggle,
-  payload: {
-    inputCurrency: input,
-    outputCurrency: output,
-  } as Payload,
-});
+const toggle = ({ input, output }: { [field in "input" | "output"]: AllowedCurrencies }): Action => {
+  return {
+    type: ActionTypes.Toggle,
+    payload: {
+      inputCurrency: input,
+      outputCurrency: output,
+    } as Payload,
+  };
+};
 
 const exchange = ({ input, output }: { [field in "input" | "output"]: Amount }): Action => ({
   type: ActionTypes.Exchange,
@@ -70,7 +72,11 @@ const exchange = ({ input, output }: { [field in "input" | "output"]: Amount }):
   } as Payload,
 });
 
-export default {
+const bindedAction = (dispatch: Function) => (actionCreator: Function) => (...args: any[]) => {
+  dispatch(actionCreator(...args));
+};
+
+const actions = {
   setInputAmount,
   changeOutputCurrency,
   changeInputPocket,
@@ -78,3 +84,16 @@ export default {
   toggle,
   exchange,
 };
+
+export const createBindedActions = (dispatch: Function) => {
+  return {
+    setInputAmount: bindedAction(dispatch)(setInputAmount),
+    changeOutputCurrency: bindedAction(dispatch)(changeOutputCurrency),
+    changeInputPocket: bindedAction(dispatch)(changeInputPocket),
+    updateRates: bindedAction(dispatch)(updateRates),
+    toggle: bindedAction(dispatch)(toggle),
+    exchange: bindedAction(dispatch)(exchange),
+  };
+};
+
+export default actions;

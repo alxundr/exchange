@@ -58,6 +58,6 @@ describe("App Component", () => {
     );
     renderApp();
     expect(screen.queryByText(/loading.../)).not.toBeNull();
-    await waitFor(async () => expect(screen.queryByText(/loading.../)).toBeNull());
+    await waitFor(() => expect(screen.queryByText(/loading.../)).toBeNull());
   });
 });
