@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import { mount } from "enzyme";
 import { useInterval } from "./interval";
-import { act } from "react-dom/test-utils";
+import { act, render, screen } from "@testing-library/react";
 
 const IntervalComponentTest = () => {
   const [counter, setCounter] = useState(0);
@@ -14,27 +13,23 @@ const IntervalComponentTest = () => {
 };
 
 describe("useInterval", () => {
-  beforeEach(() => {
-    jest.useFakeTimers();
-  });
-
   test("updates counter every 500ms", () => {
     expect.assertions(3);
 
-    const dummy = mount(<IntervalComponentTest />);
+    const dummy = render(<IntervalComponentTest />);
 
-    expect(dummy.find("div.message").text()).toEqual("0");
+    expect(screen.queryByText(/0/)).not.toBeNull();
 
     act(() => {
       jest.advanceTimersByTime(600);
     });
 
-    expect(dummy.find("div.message").text()).toEqual("1");
+    expect(screen.queryByText(/1/)).not.toBeNull();
 
     act(() => {
       jest.advanceTimersByTime(400);
     });
 
-    expect(dummy.find("div.message").text()).toEqual("2");
+    expect(screen.queryByText(/2/)).not.toBeNull();
   });
 });

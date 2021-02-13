@@ -1,5 +1,6 @@
 import { Amount, getAmount } from "domain/amount";
 import { AllowedCurrencies } from "domain/currency";
+import axios from "axios";
 
 type Pocket = {
   amount: number;
@@ -7,7 +8,6 @@ type Pocket = {
 };
 
 export const getPockets = async (): Promise<Amount[]> => {
-  const responsePockets = await fetch("./data/input.json");
-  const { pockets } = (await responsePockets.json()) as { pockets: Pocket[] };
+  const { pockets } = (await (await axios.get("/pockets")).data) as { pockets: Pocket[] };
   return pockets.map(({ amount, currency }) => getAmount(amount, currency));
 };

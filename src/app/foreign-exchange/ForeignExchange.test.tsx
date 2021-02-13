@@ -1,17 +1,12 @@
 import React from "react";
-import { mount, ReactWrapper } from "enzyme";
-import "whatwg-fetch";
-import fetchMock from "fetch-mock";
-import { act } from "react-dom/test-utils";
 
 import { getAmount } from "../../domain/amount";
 import { AllowedCurrencies } from "../../domain/currency";
 import { State } from "../../store/state";
 import ForeignExchange from "./ForeignExchange";
-import InputAmount from "../shared/components/InputAmount";
-import Text from "../shared/components/Text";
-import { OPEN_EXCHANGE_ENDPOINT } from "../../proxy/rates";
-import { InputAmountDisabled } from "../shared/components/InputAmount";
+import { server } from "../../mocks/server";
+import { rest } from "msw";
+import { fireEvent, screen, render, act, waitFor } from "@testing-library/react";
 
 describe("ForeignExchange", () => {
   const initialState = (): State => ({
@@ -24,27 +19,10 @@ describe("ForeignExchange", () => {
     input: getAmount(0),
     output: getAmount(0, AllowedCurrencies.EUR),
   });
-  let component: ReactWrapper;
 
-  beforeEach(() => {
-    jest.useFakeTimers();
-  });
-
-  beforeAll(() => {
-    global["fetch"] = fetch;
-  });
-
-  afterEach(() => {
-    component.unmount();
-    jest.clearAllMocks();
-    jest.clearAllTimers();
-    fetchMock.restore();
-  });
-
-  const updateInputAmount = (amount: number) => {
-    act(() => {
-      component.find(InputAmount).prop("onChange")(amount);
-    });
+  const updateInputAmount = (newAmount: number) => {
+    const input = screen.getByTestId("input-amount");
+    fireEvent.change(input, { target: { value: newAmount } });
   };
 
   const advanceIntervalBy = async (time: number) => {
@@ -53,181 +31,148 @@ describe("ForeignExchange", () => {
     });
   };
 
-  const selectOutputCurrencyFromTop = (currency: string) => {
-    act(() => {
-      component
-        .find("select")
-        .at(0)
-        .props()
-        .onChange({ target: { value: currency } } as any);
-    });
+  const selectInputCurrency = (nextCurrency: string) => {
+    fireEvent.change(screen.getByTestId("input-currency-select"), { target: { value: nextCurrency } });
+  };
+
+  const selectOutputCurrency = (nextCurrency: string) => {
+    fireEvent.change(screen.getByTestId("output-currency-select"), { target: { value: nextCurrency } });
   };
 
   const toggleCurrency = async () => {
-    await act(async () => {
-      component.find("img.toggle-arrows").props().onClick(null);
-    });
+    fireEvent.click(screen.getByRole("img"));
   };
 
-  const selectInputPocket = async (currency: string) => {
-    await act(async () => {
-      component
-        .find("select.large")
-        .at(0)
-        .props()
-        .onChange({ target: { value: currency } } as any);
-    });
-  };
-  const selectOutputCurrencyFromBottom = (currency: string) => {
-    act(() => {
-      component
-        .find("select.large")
-        .at(1)
-        .props()
-        .onChange({ target: { value: currency } } as any);
-    });
+  const selectOutputCurrencyFromEquivalence = async (nextCurrency: string) => {
+    fireEvent.change(screen.getByTestId("output-pocket-select"), { target: { value: nextCurrency } });
   };
 
   const submit = () => {
-    act(() => {
-      component.find("button").props().onClick(null);
-    });
+    fireEvent.click(screen.getByRole("button"));
   };
 
   test("updates rate every 10 seconds and update the output", async () => {
-    fetchMock.mock(`${OPEN_EXCHANGE_ENDPOINT}&base=GBP`, {
-      rates: {
-        EUR: 1.23,
-        USD: 4.56,
-        GBP: 1,
-      },
-    });
+    server.use(
+      rest.get("/exchange", (req, res, ctx) => {
+        return res(
+          ctx.json({
+            rates: {
+              EUR: 1.23,
+              USD: 4.56,
+              GBP: 1,
+            },
+          })
+        );
+      })
+    );
 
-    component = mount(<ForeignExchange {...initialState()} />);
-    expect(component.find("option").at(0).text()).toContain("£ 1.00 = € 1.00");
-
-    await advanceIntervalBy(10001);
+    render(<ForeignExchange {...initialState()} />);
+    expect(screen.queryByText("£ 1.00 = € 1.00")).not.toBeNull();
     updateInputAmount(1);
-    component.update();
-    expect(component.find(InputAmountDisabled).prop("amount").toString()).toEqual("€ 1.23");
-
-    fetchMock.restore();
-    fetchMock.mock(`${OPEN_EXCHANGE_ENDPOINT}&base=GBP`, {
-      rates: {
-        EUR: 4.56,
-        USD: 4.56,
-        GBP: 1,
-      },
-    });
     await advanceIntervalBy(10001);
-    component.update();
-    expect(component.find(InputAmountDisabled).prop("amount").toString()).toEqual("€ 4.56");
+    await waitFor(() => expect(screen.queryByText("£ 1.00 = € 1.23")).not.toBeNull());
+
+    server.use(
+      rest.get("/exchange", (req, res, ctx) => {
+        return res(
+          ctx.json({
+            rates: {
+              EUR: 4.56,
+              USD: 4.56,
+              GBP: 1,
+            },
+          })
+        );
+      })
+    );
+    await advanceIntervalBy(10001);
+    await waitFor(() => expect(screen.queryByText("£ 1.00 = € 4.56")).not.toBeNull());
   });
 
-  test("update ouput on select currency change", () => {
-    component = mount(<ForeignExchange {...{ ...initialState(), rates: { USD: 1, EUR: 2, GBP: 1 } }} />);
+  test("update ouput on select currency change", async () => {
+    render(<ForeignExchange {...{ ...initialState(), rates: { USD: 1, EUR: 2, GBP: 1 } }} />);
+    updateInputAmount(2);
+    expect(screen.queryByText("€ 4.00")).not.toBeNull();
+
+    server.use(
+      rest.get("/exchange", (req, res, ctx) => {
+        return res(
+          ctx.json({
+            rates: {
+              EUR: 0.8,
+              USD: 1,
+              GBP: 0.9,
+            },
+          })
+        );
+      })
+    );
+
+    selectInputCurrency("USD");
+    await waitFor(() => expect(screen.queryByText("$ 1.00 = £ 0.90")).not.toBeNull());
     updateInputAmount(1);
-    component.update();
-    expect(component.find(InputAmountDisabled).prop("amount").toString()).toEqual("€ 2.00");
 
-    selectOutputCurrencyFromTop("USD");
-    component.update();
-    expect(component.find(InputAmountDisabled).prop("amount").toString()).toEqual("$ 1.00");
+    selectOutputCurrency("GBP");
+    await waitFor(() => expect(screen.queryByText("Balance £ 1.00")).not.toBeNull());
 
-    selectOutputCurrencyFromBottom("EUR");
-    component.update();
-    expect(component.find(InputAmountDisabled).prop("amount").toString()).toEqual("€ 2.00");
+    selectOutputCurrency("EUR");
+    await waitFor(() => expect(screen.queryByText("Balance € 1.00")).not.toBeNull());
   });
 
   test("toggle currency input and output", async () => {
-    fetchMock.mock(`${OPEN_EXCHANGE_ENDPOINT}&base=EUR`, {
-      rates: {
-        EUR: 4.56,
-        USD: 4.56,
-        GBP: 1,
-      },
-    });
+    render(<ForeignExchange {...initialState()} />);
+    expect(screen.queryByText("£ 1.00 = € 1.00")).not.toBeNull();
 
-    component = mount(<ForeignExchange {...initialState()} />);
-    expect(initialState().input.currency.id).toEqual("GBP");
-    expect(initialState().output.currency.id).toEqual("EUR");
-    expect(component.find(InputAmount).at(0).prop("amount").isSame(initialState().input)).toEqual(true);
-    expect(component.find(InputAmountDisabled).prop("amount").isSame(initialState().output)).toEqual(true);
+    server.use(
+      rest.get("/exchange", (req, res, ctx) => {
+        return res(
+          ctx.json({
+            rates: {
+              EUR: 1,
+              USD: 1.25,
+              GBP: 0.9,
+            },
+          })
+        );
+      })
+    );
 
-    await toggleCurrency();
-    component.update();
-    expect(component.find(InputAmount).at(0).prop("amount").isSame(initialState().output)).toEqual(true);
-    expect(component.find(InputAmountDisabled).prop("amount").isSame(initialState().input)).toEqual(true);
+    toggleCurrency();
+
+    await waitFor(() => expect(screen.queryByText("€ 1.00 = £ 0.90")).not.toBeNull());
   });
 
-  test("change input pocket", async () => {
-    fetchMock.mock(`${OPEN_EXCHANGE_ENDPOINT}&base=EUR`, {
-      rates: {
-        EUR: 1,
-        USD: 1.08,
-        GBP: 0.89,
-      },
-    });
-    component = mount(<ForeignExchange {...initialState()} />);
-    expect(initialState().pockets[0].currency.id).toEqual("GBP");
-    expect(initialState().pockets[1].currency.id).toEqual("EUR");
+  test("change output pocket from equivalence", async () => {
+    render(<ForeignExchange {...initialState()} />);
 
-    await selectInputPocket(initialState().pockets[1].currency.id);
-    component.update();
-    expect(component.find(InputAmount).at(0).prop("amount").value).toEqual(0);
-    expect(component.find(InputAmount).at(0).prop("amount").currency.id).toEqual("EUR");
+    selectOutputCurrencyFromEquivalence("EUR");
+    await waitFor(() => expect(screen.queryByText("Balance € 1.00")).not.toBeNull());
   });
 
-  test("disable exchange button", () => {
-    fetchMock.mock(`${OPEN_EXCHANGE_ENDPOINT}&base=GBP`, {
-      rates: {
-        EUR: 4.56,
-        USD: 4.56,
-        GBP: 1,
-      },
-    });
-    component = mount(<ForeignExchange {...initialState()} />);
+  test("disable exchange button for out of bound amount", () => {
+    render(<ForeignExchange {...initialState()} />);
     updateInputAmount(10);
-    component.update();
-    expect(component.find("button").props().disabled).toBeTruthy();
-
-    expect(initialState().pockets[0].value).toEqual(1);
+    expect(screen.getByRole("button")).toBeDisabled();
 
     updateInputAmount(1);
-    component.update();
-    expect(component.find("button").props().disabled).toBeFalsy();
+    expect(screen.getByRole("button")).not.toBeDisabled();
   });
 
   test("exchange input amount to output amount and change input if balance is less than current input", () => {
-    component = mount(<ForeignExchange {...initialState()} />);
-    expect(component.find(Text).at(0).text()).toContain("Balance £ 1.00");
+    render(<ForeignExchange {...initialState()} />);
 
     updateInputAmount(0.2);
-    component.update();
-    expect(component.find("button").props().disabled).toBeFalsy();
-
     submit();
-    component.update();
-    expect(component.find(Text).at(0).text()).toContain("Balance £ 0.80");
+    expect(screen.queryByText("Balance £ 0.80")).not.toBeNull();
 
     updateInputAmount(0.7);
-    component.update();
-    expect(component.find("button").props().disabled).toBeFalsy();
-
     submit();
-    component.update();
-    expect(component.find(Text).at(0).text()).toContain("Balance £ 0.10");
-    expect(component.find(InputAmount).prop("amount").value).toEqual(0.1);
-    expect(component.find(InputAmountDisabled).prop("amount").value).toEqual(0.1);
+    expect(screen.queryByText("Balance £ 0.10")).not.toBeNull();
 
     updateInputAmount(0.1);
-    component.update();
-    expect(component.find("button").props().disabled).toBeFalsy();
-
     submit();
-    component.update();
-    expect(component.find(Text).at(0).text()).toContain("Balance £ 0.00");
-    expect(component.find(InputAmount).prop("amount").value).toEqual(0);
-    expect(component.find(InputAmountDisabled).prop("amount").value).toEqual(0);
+    expect(screen.queryByText("Balance £ 0.00")).not.toBeNull();
+
+    expect(screen.getByRole("button")).toBeDisabled();
   });
 });

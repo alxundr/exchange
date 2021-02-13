@@ -89,7 +89,7 @@ const ForeignExchange: React.FC<State> = (props: State) => {
   return (
     <>
       <Card>
-        <select onChange={handleOutputSelectChange} value={state.output.currency.id}>
+        <select data-testid="output-pocket-select" onChange={handleOutputSelectChange} value={state.output.currency.id}>
           {state.pockets
             .filter(({ currency }: Amount) => currency.id !== state.input.currency.id)
             .map((pocket: Amount) => (
@@ -99,10 +99,16 @@ const ForeignExchange: React.FC<State> = (props: State) => {
             ))}
         </select>
         <div className="space-between">
-          <select className="large" value={state.input.currency.id} onChange={handleInputSelectChange}>
+          <select
+            data-testid="input-currency-select"
+            className="large"
+            value={state.input.currency.id}
+            onChange={handleInputSelectChange}
+          >
             <CurrencyOptions pockets={state.pockets} currentCurrency={state.output.currency.id} />
           </select>
           <InputAmount
+            alt="input amount"
             onChange={(value: number) => dispatch(actionCreators.setInputAmount(value))}
             amount={state.input}
             focused={state.input.value === 0}
@@ -115,7 +121,12 @@ const ForeignExchange: React.FC<State> = (props: State) => {
       <Card color={CardColor.Dark}>
         <img className={styles["toggle-arrows"]} src={ToggleArrows} alt="toggle" onClick={toggle} />
         <div className="space-between">
-          <select className="large" value={state.output.currency.id} onChange={handleOutputSelectChange}>
+          <select
+            data-testid="output-currency-select"
+            className="large"
+            value={state.output.currency.id}
+            onChange={handleOutputSelectChange}
+          >
             <CurrencyOptions pockets={state.pockets} currentCurrency={state.input.currency.id} />
           </select>
           <InputAmountDisabled amount={state.output} />

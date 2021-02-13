@@ -7,7 +7,6 @@ export interface Amount {
   toExchange: (rate: number, currencyId: AllowedCurrencies) => Amount;
   updateValue: (newValue: number) => Amount;
   reset: (currencyId?: AllowedCurrencies) => Amount;
-  isSame: (anotherAmount: Amount) => boolean;
 }
 
 export function getFixedValue(amount: number): number {
@@ -39,9 +38,6 @@ export function getAmount(value: number, currencyId: AllowedCurrencies = Allowed
         this.currency = getCurrency(currencyId);
       }
       return this.updateValue(0);
-    },
-    isSame(anotherAmount: Amount) {
-      return this.value === anotherAmount.value && this.currency.id === anotherAmount.currency.id;
     },
   };
 }

@@ -1,7 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Card matches snapshot 1`] = `
-"<div className=\\"card\\" style={{...}}>
-  Luke, I am your father!
-</div>"
+<div>
+  <div
+    class="card"
+    style="color: white; background-color: white;"
+  >
+    Luke, I am your father!
+  </div>
+</div>
 `;

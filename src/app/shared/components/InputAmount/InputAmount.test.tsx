@@ -1,43 +1,25 @@
 import React from "react";
-import { mount, ReactWrapper } from "enzyme";
-import { act } from "react-dom/test-utils";
 import InputAmount from "./InputAmount";
 import { getAmount } from "../../../../domain/amount";
+import { render, fireEvent, screen } from "@testing-library/react";
 
 describe("InputAmount Component", () => {
-  let inputAmount: ReactWrapper;
-
-  afterEach(() => {
-    inputAmount.unmount();
-  });
-
   const updateAmount = (value: any) => {
-    act(() => {
-      inputAmount
-        .find("input.input-amount-field")
-        .at(0)
-        .props()
-        .onChange({ currentTarget: { value } } as any);
-    });
+    const input = screen.getByTestId("input-amount");
+    fireEvent.change(input, { target: { value } });
   };
 
   test("sets value from input change", () => {
-    let value = 0;
-    const setValue = (newValue: number) => {
-      value = newValue;
-    };
-    inputAmount = mount(<InputAmount amount={getAmount(value)} onChange={setValue} />);
-    updateAmount(-1);
-    expect(value).toEqual(-1);
+    const setValue = jest.fn();
+    render(<InputAmount alt="amount" amount={getAmount(0)} onChange={setValue} />);
+    updateAmount(124);
+    expect(setValue).toHaveBeenCalledWith(124);
   });
 
   test("sets value to zero in case amount is not a valid number", () => {
-    let value = 1;
-    const setValue = (newValue: number) => {
-      value = newValue;
-    };
-    inputAmount = mount(<InputAmount amount={getAmount(value)} onChange={setValue} />);
-    updateAmount("");
-    expect(value).toEqual(0);
+    const setValue = jest.fn();
+    render(<InputAmount alt="amount" amount={getAmount(1)} onChange={setValue} />);
+    updateAmount("abc");
+    expect(setValue).toHaveBeenCalledWith(0);
   });
 });

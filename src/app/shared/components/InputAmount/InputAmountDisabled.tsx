@@ -7,7 +7,7 @@ interface InputAmountProps {
 }
 
 const InputAmountDisabled: React.FC<InputAmountProps> = ({ amount }) => {
-  return <span>{amount.value > 0 && <div className={styles["input-amount-field"]}>{amount.value}</div>}</span>;
+  return <span>{amount.value > 0 && <div className={styles["input-amount-field"]}>{amount.toString()}</div>}</span>;
 };
 
 export default InputAmountDisabled;

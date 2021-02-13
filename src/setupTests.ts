@@ -1,4 +1,12 @@
-import { configure } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import "@testing-library/jest-dom/extend-expect";
+import { server } from "./mocks/server";
 
-configure({ adapter: new Adapter() });
+beforeAll(() => {
+  server.listen();
+  jest.useFakeTimers();
+});
+
+afterAll(() => {
+  server.close();
+  jest.useRealTimers();
+});
