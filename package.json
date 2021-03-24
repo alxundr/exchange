@@ -30,7 +30,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "test": "react-scripts test --coverage --watchAll=false",
+    "test": "react-scripts test",
     "test:file": "react-scripts test --findRelatedTests",
     "test:file:debug": "react-scripts --inspect-brk test --watch --no-cache --findRelatedTests",
     "build": "react-scripts build",

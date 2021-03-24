@@ -9,7 +9,7 @@ import ForeignExchange from "./foreign-exchange/ForeignExchange";
 import styles from "./App.module.scss";
 
 const App: React.FC = () => {
-  const { data: initialState } = useQuery<State>("initialState", async () => {
+  const { data: initialState } = useQuery<State>("INITIAL_STATE", async () => {
     const pockets = await getPockets();
     const [inputPocket, outputPocket] = pockets;
     const input = getAmount(0, inputPocket?.currency.id);
